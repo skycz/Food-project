@@ -55,11 +55,20 @@ window.addEventListener('DOMContentLoaded', () => {
     const deadline = '2024-12-23'; // Устанавливаем конечную дату таймера
 
     function getTimeRemaining(endtime) {
-        const t = Date.parse(endtime) - Date.parse(new Date()), // Разница между конечной и текущей датой
-              days = Math.floor(t / (1000 * 60 * 60 * 24)), // Переводим оставшееся время в дни
-              hours = Math.floor((t / (1000 * 60 * 60)) % 24), // Вычисляем оставшиеся часы
-              minutes = Math.floor((t / 1000 / 60) % 60), // Вычисляем оставшиеся минуты
-              seconds = Math.floor((t / 1000) % 60); // Вычисляем оставшиеся секунды
+        let days, hours, minutes, seconds;
+        const t = Date.parse(endtime) - Date.parse(new Date()); // Разница между конечной и текущей датой
+
+        if (t <= 0) { // Если время вышло (разница времени меньше или равна 0)
+            days = 0; // Устанавливаем дни равными 0
+            hours = 0; // Устанавливаем часы равными 0
+            minutes = 0; // Устанавливаем минуты равными 0
+            seconds = 0; // Устанавливаем секунды равными 0
+        } else {
+            days = Math.floor(t / (1000 * 60 * 60 * 24)), // Переводим оставшееся время в дни
+            hours = Math.floor((t / (1000 * 60 * 60)) % 24), // Вычисляем оставшиеся часы
+            minutes = Math.floor((t / 1000 / 60) % 60), // Вычисляем оставшиеся минуты
+            seconds = Math.floor((t / 1000) % 60); // Вычисляем оставшиеся секунды
+        }
 
         return {
               'total': t, // Общее время до конца
