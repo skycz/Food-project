@@ -162,3 +162,77 @@ function showModalByScroll() {
 
 window.addEventListener('scroll', showModalByScroll); // Открытие окна при прокрутке
 
+
+
+ // Используем классы для создание карточек меню
+class MenuCard {
+    constructor(src, alt, title, descr, price, parentSelector, ...classes) {
+        this.src = src; // Путь к изображению
+        this.alt = alt; // Альтернативный текст для изображения
+        this.title = title; // Заголовок карточки
+        this.descr = descr; // Описание меню
+        this.price = price; // Цена в долларах
+        this.classes = classes; // Дополнительные CSS-классы
+        this.parent = document.querySelector(parentSelector); // Родительский контейнер
+        this.transfer = 27; // Курс доллара к гривне
+        this.changeToUAH(); // Конвертация цены в гривны
+    }
+
+    changeToUAH() {
+        this.price = this.price * this.transfer; // Перевод цены в гривны
+    }
+
+    render() {
+        const element = document.createElement('div'); // Создаем карточку
+        if (this.classes.length === 0) {
+            this.element = 'menu__item'; // Класс по умолчанию
+            element.classList.add(this.element);
+        } else {
+            this.classes.forEach(className => element.classList.add(className)); // Добавляем переданные классы
+        }
+
+        element.innerHTML = `
+                <img src=${this.src} alt=${this.alt}>
+                <h3 class="menu__item-subtitle">${this.title}</h3>
+                <div class="menu__item-descr">${this.descr}</div>
+                <div class="menu__item-divider"></div>
+                <div class="menu__item-price">
+                    <div class="menu__item-cost">Цена:</div>
+                    <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+                </div>
+        `; // Заполняем карточку данными
+        this.parent.append(element); // Добавляем карточку на страницу
+    }
+}
+
+new MenuCard(
+    "img/tabs/vegy.jpg", // Изображение
+    "vegy",              // Альтернативный текст
+    'Меню "Фитнес"',      // Заголовок
+    'Меню ”Фитнес” - это новый подход к приготовлению блюд...', // Описание
+    9,                   // Цена
+    '.menu .container',  // Родительский контейнер
+    'menu__item'         // Класс
+).render(); // Создаем и отображаем карточку
+
+new MenuCard(
+    "img/tabs/elite.jpg",
+    "elite",
+    'Меню "Премиум"',
+    'В меню “Премиум” мы используем не только красивый дизайн упаковки...',
+    14,
+    '.menu .container',
+    'menu__item'
+).render();
+
+new MenuCard(
+    "img/tabs/post.jpg",
+    "post",
+    'Меню "Постное"',
+    'Меню “Постное” - это тщательный подбор ингредиентов...',
+    21,
+    '.menu .container',
+    'menu__item'
+).render(); // Добавляем еще карточки
+
+
