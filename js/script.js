@@ -6,187 +6,167 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const tabs = document.querySelectorAll('.tabheader__item'),
         tabsContent = document.querySelectorAll('.tabcontent'),
-        tabsParent = document.querySelector('.tabheader__items'); // Родительский элемент вкладок
+        tabsParent = document.querySelector('.tabheader__items');
 
-    // Скрываем весь контент вкладок и убираем активное состояние у всех вкладок
-     
     function hideTabContent() {
         tabsContent.forEach(item => {
-            // Скрываем контент каждой вкладки
-            item.classList.add('hide', 'fade'); 
-            item.classList.remove('show'); 
+            item.classList.add('hide', 'fade');
+            item.classList.remove('show');
         });
 
         tabs.forEach(tab => {
-            // Убираем активный класс у всех вкладок
             tab.classList.remove('tabheader__item_active');
         });
     }
 
-    // Показываем конкретный контент вкладки
     function showTabContent(i = 0) {
         tabsContent[i].classList.add('show', 'fade');
         tabsContent[i].classList.remove('hide');
-        tabs[i].classList.add('tabheader__item_active'); 
-        // Добавляем активный класс для текущей вкладки
+        tabs[i].classList.add('tabheader__item_active');
     }
 
-    
-    hideTabContent(); // Скрываем все вкладки
-    showTabContent(); // Показываем первую вкладку
+    hideTabContent();
+    showTabContent();
 
-    // Обработчик кликов по вкладкам
     tabsParent.addEventListener('click', (event) => {
         const target = event.target;
 
         if (target && target.classList.contains('tabheader__item')) {
-            // Проверяем, что клик был по элементу с классом вкладки
             tabs.forEach((item, i) => {
                 if (target == item) {
-                    
-                    hideTabContent(); // Скрываем весь контент
-                    showTabContent(i); // Показываем контент соответствующей вкладки
+                    hideTabContent();
+                    showTabContent(i);
                 }
             });
         }
     });
-    
-    // Timer 
 
-    const deadline = '2024-12-23'; // Устанавливаем конечную дату таймера
+    // Timer
+
+    const deadline = '2024-12-23';
 
     function getTimeRemaining(endtime) {
         let days, hours, minutes, seconds;
-        const t = Date.parse(endtime) - Date.parse(new Date()); // Разница между конечной и текущей датой
+        const t = Date.parse(endtime) - Date.parse(new Date());
 
-        if (t <= 0) { // Если время вышло (разница времени меньше или равна 0)
-            days = 0; // Устанавливаем дни равными 0
-            hours = 0; // Устанавливаем часы равными 0
-            minutes = 0; // Устанавливаем минуты равными 0
-            seconds = 0; // Устанавливаем секунды равными 0
+        if (t <= 0) {
+            days = 0;
+            hours = 0;
+            minutes = 0;
+            seconds = 0;
         } else {
-            days = Math.floor(t / (1000 * 60 * 60 * 24)), // Переводим оставшееся время в дни
-                hours = Math.floor((t / (1000 * 60 * 60)) % 24), // Вычисляем оставшиеся часы
-                minutes = Math.floor((t / 1000 / 60) % 60), // Вычисляем оставшиеся минуты
-                seconds = Math.floor((t / 1000) % 60); // Вычисляем оставшиеся секунды
+            days = Math.floor(t / (1000 * 60 * 60 * 24));
+            hours = Math.floor((t / (1000 * 60 * 60)) % 24);
+            minutes = Math.floor((t / 1000 / 60) % 60);
+            seconds = Math.floor((t / 1000) % 60);
         }
 
         return {
-            'total': t, // Общее время до конца
-            'days': days, // Оставшиеся дни
-            'hours': hours, // Оставшиеся часы
-            'minutes': minutes, // Оставшиеся минуты
-            'seconds': seconds // Оставшиеся секунды
+            'total': t,
+            'days': days,
+            'hours': hours,
+            'minutes': minutes,
+            'seconds': seconds
         };
     }
 
-    function getZero(num) { // Добавляет 0 перед однозначным числом
+    function getZero(num) {
         if (num >= 0 && num < 10) {
-            return `0${num}`; // Преобразует 5 в "05"
+            return `0${num}`;
         } else {
-            return num; // Возвращает число как есть
+            return num;
         }
     }
 
     function setClock(selector, endtime) {
-        const timer = document.querySelector(selector), // Таймер на странице
-            days = timer.querySelector('#days'), // Блок для дней
-            hours = timer.querySelector('#hours'), // Блок для часов
-            minutes = timer.querySelector('#minutes'), // Блок для минут
-            seconds = timer.querySelector('#seconds'), // Блок для секунд
-            timeInterval = setInterval(updateClock, 1000); // Обновляем каждую секунду
+        const timer = document.querySelector(selector),
+            days = timer.querySelector('#days'),
+            hours = timer.querySelector('#hours'),
+            minutes = timer.querySelector('#minutes'),
+            seconds = timer.querySelector('#seconds'),
+            timeInterval = setInterval(updateClock, 1000);
 
-        updateClock(); // Первичное обновление для устранения задержки
+        updateClock();
 
-        function updateClock() { // Функция обновления значений таймера
-            const t = getTimeRemaining(endtime); // Получаем оставшееся время
+        function updateClock() {
+            const t = getTimeRemaining(endtime);
 
-            days.textContent = getZero(t.days); // Записываем оставшиеся дни
-            hours.textContent = getZero(t.hours); // Записываем оставшиеся часы
-            minutes.textContent = getZero(t.minutes); // Записываем оставшиеся минуты
-            seconds.textContent = getZero(t.seconds); // Записываем оставшиеся секунды
+            days.textContent = getZero(t.days);
+            hours.textContent = getZero(t.hours);
+            minutes.textContent = getZero(t.minutes);
+            seconds.textContent = getZero(t.seconds);
 
-            if (t.total <= 0) { // Если время вышло
-                clearInterval(timeInterval); // Останавливаем таймер
+            if (t.total <= 0) {
+                clearInterval(timeInterval);
             }
         }
     }
 
-    setClock('.timer', deadline); // Запускаем таймер с конечной датой
+    setClock('.timer', deadline);
 
-    // Modal 
+    // Modal
 
-    const modalTrigger = document.querySelectorAll('[data-modal]'), // Кнопки открытия модального окна
-        modal = document.querySelector('.modal'), // Модальное окно
-        modalCloseBtn = document.querySelector('[data-close]'); // Кнопка закрытия окна
+    const modalTrigger = document.querySelectorAll('[data-modal]'),
+        modal = document.querySelector('.modal'),
+        modalCloseBtn = document.querySelector('[data-close]');
 
     function openModal() {
-        modal.classList.add('show'); // Показываем модальное окно
-        modal.classList.remove('hide'); // Убираем класс скрытия
-        document.body.style.overflow = 'hidden'; // Блокируем прокрутку страницы
-        clearInterval(modalTimerId); // Убираем таймер открытия
+        modal.classList.add('show');
+        modal.classList.remove('hide');
+        document.body.style.overflow = 'hidden';
+        clearInterval(modalTimerId);
     }
 
     modalTrigger.forEach(btn => {
-        btn.addEventListener('click', openModal); // Обработчик клика для кнопок открытия окна
+        btn.addEventListener('click', openModal);
     });
 
     function closeModal() {
-        modal.classList.add('hide'); // Добавляем класс скрытия
-        modal.classList.remove('show'); // Убираем класс показа
-        document.body.style.overflow = ''; // Включаем прокрутку страницы
+        modal.classList.add('hide');
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
     }
 
-    modalCloseBtn.addEventListener('click', closeModal); // Клик на кнопку закрытия
+    modalCloseBtn.addEventListener('click', closeModal);
 
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) { // Проверка, что клик был за пределами окна
-            closeModal(); // Закрываем окно
+        if (e.target === modal) {
+            closeModal();
         }
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.code === "Escape" && modal.classList.contains('show')) { // Нажатие Escape
-            closeModal(); // Закрываем окно
+        if (e.code === "Escape" && modal.classList.contains('show')) {
+            closeModal();
         }
     });
 
-    const modalTimerId = setTimeout(openModal, 5000); // Автоматическое открытие через 5 секунд
+    // MenuCard
 
-    function showModalByScroll() {
-        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) { // Скролл до конца страницы
-            openModal(); // Открываем окно
-            window.removeEventListener('scroll', showModalByScroll); // Убираем обработчик
-        }
-    }
-
-    window.addEventListener('scroll', showModalByScroll); // Открытие окна при прокрутке
-
-    // Используем классы для создание карточек меню
     class MenuCard {
         constructor(src, alt, title, descr, price, parentSelector, ...classes) {
-            this.src = src; // Путь к изображению
-            this.alt = alt; // Альтернативный текст для изображения
-            this.title = title; // Заголовок карточки
-            this.descr = descr; // Описание меню
-            this.price = price; // Цена в долларах
-            this.classes = classes; // Дополнительные CSS-классы
-            this.parent = document.querySelector(parentSelector); // Родительский контейнер
-            this.transfer = 27; // Курс доллара к гривне
-            this.changeToUAH(); // Конвертация цены в гривны
+            this.src = src;
+            this.alt = alt;
+            this.title = title;
+            this.descr = descr;
+            this.price = price;
+            this.classes = classes;
+            this.parent = document.querySelector(parentSelector);
+            this.transfer = 27;
+            this.changeToUAH();
         }
 
         changeToUAH() {
-            this.price = this.price * this.transfer; // Перевод цены в гривны
+            this.price = this.price * this.transfer;
         }
 
         render() {
-            const element = document.createElement('div'); // Создаем карточку
+            const element = document.createElement('div');
             if (this.classes.length === 0) {
-                this.element = 'menu__item'; // Класс по умолчанию
+                this.element = 'menu__item';
                 element.classList.add(this.element);
             } else {
-                this.classes.forEach(className => element.classList.add(className)); // Добавляем переданные классы
+                this.classes.forEach(className => element.classList.add(className));
             }
 
             element.innerHTML = `
@@ -198,20 +178,20 @@ window.addEventListener('DOMContentLoaded', () => {
                     <div class="menu__item-cost">Цена:</div>
                     <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
                 </div>
-        `; // Заполняем карточку данными
-            this.parent.append(element); // Добавляем карточку на страницу
+        `;
+            this.parent.append(element);
         }
     }
 
     new MenuCard(
-        "img/tabs/vegy.jpg", // Изображение
-        "vegy",              // Альтернативный текст
-        'Меню "Фитнес"',      // Заголовок
-        'Меню ”Фитнес” - это новый подход к приготовлению блюд...', // Описание
-        9,                   // Цена
-        '.menu .container',  // Родительский контейнер
-        'menu__item'         // Класс
-    ).render(); // Создаем и отображаем карточку
+        "img/tabs/vegy.jpg",
+        "vegy",
+        'Меню "Фитнес"',
+        'Меню ”Фитнес” - это новый подход к приготовлению блюд...',
+        9,
+        '.menu .container',
+        'menu__item'
+    ).render();
 
     new MenuCard(
         "img/tabs/elite.jpg",
@@ -231,48 +211,58 @@ window.addEventListener('DOMContentLoaded', () => {
         21,
         '.menu .container',
         'menu__item'
-    ).render(); // Добавляем еще карточки
-    
-    // Forms 
+    ).render();
 
-    const forms = document.querySelectorAll('form');
+    // Forms
+
+    const forms = document.querySelectorAll('form'); // Все формы на странице
 
     const message = {
-        loading: 'Загрузка',
-        success: 'Спасибо! Скоро мы с вами свяжемся',
-        failure: 'Что-то пошло не так...'
+        loading: 'Загрузка', // Сообщение при загрузке
+        success: 'Спасибо! Скоро мы с вами свяжемся', // Сообщение об успешной отправке
+        failure: 'Что-то пошло не так...' // Сообщение об ошибке
     };
 
     forms.forEach(item => {
-        postData(item);
+        postData(item); // Подключаем обработчик к каждой форме
     });
 
     function postData(form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
+        form.addEventListener('submit', (e) => { // Событие при отправке формы
+            e.preventDefault(); // Отменяем стандартное поведение
 
-            const statusMessage = document.createElement('div');
-            statusMessage.classList.add('status');
-            statusMessage.textContent = message.loading;
-            form.append(statusMessage);
+            const statusMessage = document.createElement('div'); // Создаем элемент для статуса
+            statusMessage.classList.add('status'); // Добавляем класс статуса
+            statusMessage.textContent = message.loading; // Устанавливаем сообщение о загрузке
+            form.append(statusMessage); // Добавляем сообщение в форму
 
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
+            const request = new XMLHttpRequest(); // Создаем запрос
+            request.open('POST', 'server.php'); // Устанавливаем метод и адрес
 
-            request.setRequestHeader('Content-type', 'multipart/form-data');
-            const formData = new FormData(form);
+            request.setRequestHeader('Content-type', 'application/json'); // Устанавливаем заголовок
+            const formData = new FormData(form); // Считываем данные формы
 
-            request.send(formData);
+            const object = {}; // Создаем объект для данных
+            formData.forEach(function (value, key) {
+                object[key] = value; // Преобразуем FormData в объект
+            });
 
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
-                    statusMessage.textContent = message.success;
+            const json = JSON.stringify(object); // Преобразуем объект в JSON
+
+            request.send(json); // Отправляем запрос
+
+            request.addEventListener('load', () => { // Отслеживаем загрузку ответа
+                if (request.status === 200) { // Если успешно
+                    console.log(request.response); // Логируем ответ
+                    statusMessage.textContent = message.success; // Сообщение об успехе
+                    form.reset(); // Сбрасываем форму
+                    setTimeout(() => {
+                        statusMessage.remove(); // Убираем сообщение
+                    }, 2000);
                 } else {
-                    statusMessage.textContent = message.failure;
+                    statusMessage.textContent = message.failure; // Сообщение об ошибке
                 }
             });
         });
     }
 });
-
