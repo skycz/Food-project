@@ -235,6 +235,56 @@ new MenuCard(
     'menu__item'
 ).render(); // Добавляем еще карточки
 
+    // Forms
+
+    const forms = document.querySelectorAll('form'); // Все формы на странице
+
+    const message = {
+        loading: 'Загрузка', // Сообщение при загрузке
+        success: 'Спасибо! Скоро мы с вами свяжемся', // Сообщение об успешной отправке
+        failure: 'Что-то пошло не так...' // Сообщение об ошибке
+    };
+
+    forms.forEach(item => {
+        postData(item); // Подключаем обработчик к каждой форме
+    });
+
+    function postData(form) {
+        form.addEventListener('submit', (e) => { // Событие при отправке формы
+            e.preventDefault(); // Отменяем стандартное поведение
+
+            const statusMessage = document.createElement('div'); // Создаем элемент для статуса
+            statusMessage.classList.add('status'); // Добавляем класс статуса
+            statusMessage.textContent = message.loading; // Устанавливаем сообщение о загрузке
+            form.append(statusMessage); // Добавляем сообщение в форму
+
+            const request = new XMLHttpRequest(); // Создаем запрос
+            request.open('POST', 'server.php'); // Устанавливаем метод и адрес
+
+            request.setRequestHeader('Content-type', 'application/json'); // Устанавливаем заголовок
+            const formData = new FormData(form); // Считываем данные формы
+
+            const object = {}; // Создаем объект для данных
+            formData.forEach(function (value, key) {
+                object[key] = value; // Преобразуем FormData в объект
+            });
+
+            const json = JSON.stringify(object); // Преобразуем объект в JSON
+
+            request.send(json); // Отправляем запрос
+
+            request.addEventListener('load', () => { // Отслеживаем загрузку ответа
+                if (request.status === 200) { // Если успешно
+                    console.log(request.response); // Логируем ответ
+                    statusMessage.textContent = message.success; // Сообщение об успехе
+                    form.reset(); // Сбрасываем форму
+                    setTimeout(() => {
+                        statusMessage.remove(); // Убираем сообщение
+                    }, 2000);
+                } else {
+                    statusMessage.textContent = message.failure; // Сообщение об ошибке
+                }
+            });
+        });
+    }
 });
-
-
