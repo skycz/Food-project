@@ -108,7 +108,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const modalTrigger = document.querySelectorAll('[data-modal]'),
         modal = document.querySelector('.modal'),
-        modalCloseBtn = document.querySelector('[data-close]');
 
     function openModal() {
         modal.classList.add('show');
@@ -127,10 +126,8 @@ window.addEventListener('DOMContentLoaded', () => {
         document.body.style.overflow = '';
     }
 
-    modalCloseBtn.addEventListener('click', closeModal);
-
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
+        if (e.target === modal || e.target.getAttribute('data-close') == '') {
             closeModal();
         }
     });
