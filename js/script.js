@@ -113,5 +113,53 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     setClock('.timer', deadline); // Запускаем таймер с конечной датой
+
+    // Modal 
+
+    const modalTrigger = document.querySelectorAll('[data-modal]'), // Кнопки открытия модального окна
+        modal = document.querySelector('.modal'), // Модальное окно
+        modalCloseBtn = document.querySelector('[data-close]'); // Кнопка закрытия окна
+
+    function openModal() {
+        modal.classList.add('show'); // Показываем модальное окно
+        modal.classList.remove('hide'); // Убираем класс скрытия
+        document.body.style.overflow = 'hidden'; // Блокируем прокрутку страницы
+        clearInterval(modalTimerId); // Убираем таймер открытия
+    }
+
+    modalTrigger.forEach(btn => {
+        btn.addEventListener('click', openModal); // Обработчик клика для кнопок открытия окна
+    });
+
+    function closeModal() {
+        modal.classList.add('hide'); // Добавляем класс скрытия
+        modal.classList.remove('show'); // Убираем класс показа
+        document.body.style.overflow = ''; // Включаем прокрутку страницы
+    }
+
+    modalCloseBtn.addEventListener('click', closeModal); // Клик на кнопку закрытия
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) { // Проверка, что клик был за пределами окна
+            closeModal(); // Закрываем окно
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.code === "Escape" && modal.classList.contains('show')) { // Нажатие Escape
+            closeModal(); // Закрываем окно
+        }
+    });
+
+    const modalTimerId = setTimeout(openModal, 5000); // Автоматическое открытие через 5 секунд
+
+    function showModalByScroll() {
+        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) { // Скролл до конца страницы
+            openModal(); // Открываем окно
+            window.removeEventListener('scroll', showModalByScroll); // Убираем обработчик
+        }
+    }
+
+    window.addEventListener('scroll', showModalByScroll); // Открытие окна при прокрутке
 });
 
