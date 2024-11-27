@@ -1,195 +1,171 @@
-"use strict";
-
-window.addEventListener('DOMContentLoaded', () => {
+window.addEventListener('DOMContentLoaded', function () {
 
     // Tabs
 
-    const tabs = document.querySelectorAll('.tabheader__item'),  // Вкладки
-        tabsContent = document.querySelectorAll('.tabcontent'), // Контент каждой вкладки
+    let tabs = document.querySelectorAll('.tabheader__item'), // Получаем все элементы вкладок
+        tabsContent = document.querySelectorAll('.tabcontent'), // Получаем все элементы контента вкладок
         tabsParent = document.querySelector('.tabheader__items'); // Родительский элемент вкладок
 
-    // Скрываем весь контент вкладок и убираем активное состояние у всех вкладок
-     
     function hideTabContent() {
         tabsContent.forEach(item => {
-            // Скрываем контент каждой вкладки
-            item.classList.add('hide', 'fade'); // Добавляем классы для скрытия и эффекта исчезновения
-            item.classList.remove('show'); // Убираем класс, который делает контент видимым
+            item.classList.add('hide'); // Скрываем контент вкладки
+            item.classList.remove('show', 'fade'); // Убираем классы отображения
         });
 
-        tabs.forEach(tab => {
-            // Убираем активный класс у всех вкладок
-            tab.classList.remove('tabheader__item_active');
+        tabs.forEach(item => {
+            item.classList.remove('tabheader__item_active'); // Убираем активный класс у вкладки
         });
     }
 
-    // Показываем конкретный контент вкладки
-    function showTabContent(i = 0) {
-        tabsContent[i].classList.add('show', 'fade'); // Делаем контент видимым и добавляем эффект появления
-        tabsContent[i].classList.remove('hide'); // Убираем класс скрытия
-        tabs[i].classList.add('tabheader__item_active'); // Добавляем активный класс для текущей вкладки
+    function showTabContent(i = 0) { // Показываем первую вкладку по умолчанию
+        tabsContent[i].classList.add('show', 'fade'); // Показываем контент вкладки
+        tabsContent[i].classList.remove('hide'); // Убираем скрытие
+        tabs[i].classList.add('tabheader__item_active'); // Добавляем активный класс текущей вкладке
     }
 
-    // Инициализация: скрываем весь контент и показываем первую вкладку
-    hideTabContent(); // Скрываем все вкладки
-    showTabContent(); // Показываем первую вкладку
+    hideTabContent(); // Изначально скрываем все вкладки
+    showTabContent(); // Отображаем первую вкладку
 
-    // Обработчик кликов по вкладкам
-    tabsParent.addEventListener('click', (event) => {
-        const target = event.target; // Получаем элемент, по которому кликнули
-
-        if (target && target.classList.contains('tabheader__item')) {
-            // Проверяем, что клик был по элементу с классом вкладки
+    tabsParent.addEventListener('click', function (event) { // Обработчик клика на родительском элементе
+        const target = event.target;
+        if (target && target.classList.contains('tabheader__item')) { // Проверяем, был ли клик по вкладке
             tabs.forEach((item, i) => {
-                if (target == item) {
-                    // Если текущий элемент совпадает с кликнутым
-                    hideTabContent(); // Скрываем весь контент
-                    showTabContent(i); // Показываем контент соответствующей вкладки
+                if (target == item) { // Определяем, по какой вкладке кликнули
+                    hideTabContent(); // Скрываем текущий контент
+                    showTabContent(i); // Показываем контент выбранной вкладки
                 }
             });
         }
     });
 
-// Timer 
+    // Timer
 
-    const deadline = '2024-12-23'; // Устанавливаем конечную дату таймера
+    const deadline = '2024-12-23'; // Устанавливаем дату окончания таймера
 
     function getTimeRemaining(endtime) {
-        let days, hours, minutes, seconds;
-        const t = Date.parse(endtime) - Date.parse(new Date()); // Разница между конечной и текущей датой
-
-        if (t <= 0) { // Если время вышло (разница времени меньше или равна 0)
-            days = 0; // Устанавливаем дни равными 0
-            hours = 0; // Устанавливаем часы равными 0
-            minutes = 0; // Устанавливаем минуты равными 0
-            seconds = 0; // Устанавливаем секунды равными 0
-        } else {
-            days = Math.floor(t / (1000 * 60 * 60 * 24)), // Переводим оставшееся время в дни
-            hours = Math.floor((t / (1000 * 60 * 60)) % 24), // Вычисляем оставшиеся часы
-            minutes = Math.floor((t / 1000 / 60) % 60), // Вычисляем оставшиеся минуты
-            seconds = Math.floor((t / 1000) % 60); // Вычисляем оставшиеся секунды
-        }
+        const t = Date.parse(endtime) - Date.parse(new Date()), // Вычисляем оставшееся время
+            days = Math.floor((t / (1000 * 60 * 60 * 24))), // Вычисляем оставшиеся дни
+            seconds = Math.floor((t / 1000) % 60), // Вычисляем секунды
+            minutes = Math.floor((t / 1000 / 60) % 60), // Вычисляем минуты
+            hours = Math.floor((t / (1000 * 60 * 60) % 24)); // Вычисляем часы
 
         return {
-              'total': t, // Общее время до конца
-              'days': days, // Оставшиеся дни
-              'hours': hours, // Оставшиеся часы
-              'minutes': minutes, // Оставшиеся минуты
-              'seconds': seconds // Оставшиеся секунды
+            'total': t, // Общее количество времени
+            'days': days, // Дни
+            'hours': hours, // Часы
+            'minutes': minutes, // Минуты
+            'seconds': seconds // Секунды
         };
     }
 
-    function getZero(num) { // Добавляет 0 перед однозначным числом
+    function getZero(num) { // Добавляем ноль перед числом, если оно меньше 10
         if (num >= 0 && num < 10) {
-            return `0${num}`; // Преобразует 5 в "05"
+            return '0' + num;
         } else {
-            return num; // Возвращает число как есть
+            return num;
         }
     }
 
-    function setClock(selector, endtime) {
+    function setClock(selector, endtime) { // Устанавливаем таймер на странице
         const timer = document.querySelector(selector), // Таймер на странице
-              days = timer.querySelector('#days'), // Блок для дней
-              hours = timer.querySelector('#hours'), // Блок для часов
-              minutes = timer.querySelector('#minutes'), // Блок для минут
-              seconds = timer.querySelector('#seconds'), // Блок для секунд
-              timeInterval = setInterval(updateClock, 1000); // Обновляем каждую секунду
+            days = timer.querySelector("#days"), // Поле дней
+            hours = timer.querySelector('#hours'), // Поле часов
+            minutes = timer.querySelector('#minutes'), // Поле минут
+            seconds = timer.querySelector('#seconds'), // Поле секунд
+            timeInterval = setInterval(updateClock, 1000); // Интервал обновления таймера
 
-          updateClock(); // Первичное обновление для устранения задержки
+        updateClock(); // Немедленное обновление таймера
 
-        function updateClock() { // Функция обновления значений таймера
+        function updateClock() {
             const t = getTimeRemaining(endtime); // Получаем оставшееся время
 
-              days.textContent = getZero(t.days); // Записываем оставшиеся дни
-              hours.textContent = getZero(t.hours); // Записываем оставшиеся часы
-              minutes.textContent = getZero(t.minutes); // Записываем оставшиеся минуты
-              seconds.textContent = getZero(t.seconds); // Записываем оставшиеся секунды
+            days.innerHTML = getZero(t.days); // Обновляем дни
+            hours.innerHTML = getZero(t.hours); // Обновляем часы
+            minutes.innerHTML = getZero(t.minutes); // Обновляем минуты
+            seconds.innerHTML = getZero(t.seconds); // Обновляем секунды
 
-            if (t.total <= 0) { // Если время вышло
-                clearInterval(timeInterval); // Останавливаем таймер
+            if (t.total <= 0) { // Если таймер завершился
+                clearInterval(timeInterval); // Останавливаем обновление
             }
         }
     }
-    
-      setClock('.timer', deadline); // Запускаем таймер с конечной датой
-});
 
-// Modal 
+    setClock('.timer', deadline); // Запускаем таймер
 
-const modalTrigger = document.querySelectorAll('[data-modal]'), // Кнопки открытия модального окна
-      modal = document.querySelector('.modal'), // Модальное окно
+    // Modal
 
-modalTrigger.forEach(btn => {
-    btn.addEventListener('click', openModal); // Обработчик клика для кнопок открытия окна
-});
+    const modalTrigger = document.querySelectorAll('[data-modal]'), // Кнопки для открытия модального окна
+        modal = document.querySelector('.modal'); // Само модальное окно
 
-function openModal() {
-    modal.classList.add('show'); // Показываем модальное окно
-    modal.classList.remove('hide'); // Убираем класс скрытия
-    document.body.style.overflow = ''; // Блокируем прокрутку страницы
-}
+    modalTrigger.forEach(btn => { // Добавляем обработчик на каждую кнопку
+        btn.addEventListener('click', openModal);
+    });
 
-function closeModal() {
-    modal.classList.add('hide'); // Добавляем класс скрытия
-    modal.classList.remove('show'); // Убираем класс показа
-    document.body.style.overflow = ''; // Включаем прокрутку страницы
-}
-
-modalCloseBtn.addEventListener('click', closeModal); // Клик на кнопку закрытия
-
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) { // Проверка, что клик был за пределами окна
-        closeModal(); // Закрываем окно
-    }
-});
-
-document.addEventListener('keydown', (e) => {
-    if (e.code === "Escape" && modal.classList.contains('show')) { // Нажатие Escape
-        closeModal(); // Закрываем окно
-    }
-});
-
-const modalTimerId = setTimeout(openModal, 50000); // Автоматическое открытие через 5 секунд
-
-function showModalByScroll() {
-    if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) { // Скролл до конца страницы
-        openModal(); // Открываем окно
-        window.removeEventListener('scroll', showModalByScroll); // Убираем обработчик
-    }
-}
-
-window.addEventListener('scroll', showModalByScroll); // Открытие окна при прокрутке
-
-
-
- // Используем классы для создание карточек меню
-class MenuCard {
-    constructor(src, alt, title, descr, price, parentSelector, ...classes) {
-        this.src = src; // Путь к изображению
-        this.alt = alt; // Альтернативный текст для изображения
-        this.title = title; // Заголовок карточки
-        this.descr = descr; // Описание меню
-        this.price = price; // Цена в долларах
-        this.classes = classes; // Дополнительные CSS-классы
-        this.parent = document.querySelector(parentSelector); // Родительский контейнер
-        this.transfer = 27; // Курс доллара к гривне
-        this.changeToUAH(); // Конвертация цены в гривны
+    function closeModal() { // Функция закрытия модального окна
+        modal.classList.add('hide'); // Скрываем модальное окно
+        modal.classList.remove('show'); // Убираем класс показа
+        document.body.style.overflow = ''; // Включаем прокрутку страницы
     }
 
-    changeToUAH() {
-        this.price = this.price * this.transfer; // Перевод цены в гривны
+    function openModal() { // Функция открытия модального окна
+        modal.classList.add('show'); // Показываем модальное окно
+        modal.classList.remove('hide'); // Убираем класс скрытия
+        document.body.style.overflow = 'hidden'; // Блокируем прокрутку страницы
+        clearInterval(modalTimerId); // Очищаем таймер, чтобы окно не открылось повторно
     }
 
-    render() {
-        const element = document.createElement('div'); // Создаем карточку
-        if (this.classes.length === 0) {
-            this.element = 'menu__item'; // Класс по умолчанию
-            element.classList.add(this.element);
-        } else {
-            this.classes.forEach(className => element.classList.add(className)); // Добавляем переданные классы
+    modal.addEventListener('click', (e) => { // Закрытие модального окна при клике вне его области
+        if (e.target === modal || e.target.getAttribute('data-close') == "") {
+            closeModal();
+        }
+    });
+
+    document.addEventListener('keydown', (e) => { // Закрытие модального окна по нажатию клавиши Escape
+        if (e.code === "Escape" && modal.classList.contains('show')) {
+            closeModal();
+        }
+    });
+
+    const modalTimerId = setTimeout(openModal, 50000); // Открываем окно через 50 секунд
+
+    function showModalByScroll() { // Открытие модального окна при достижении конца страницы
+        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+            openModal();
+            window.removeEventListener('scroll', showModalByScroll); // Убираем обработчик после открытия окна
+        }
+    }
+    window.addEventListener('scroll', showModalByScroll);
+
+    // Используем классы для создание карточек меню
+
+    class MenuCard { // Создаем класс для карточек
+        constructor(src, alt, title, descr, price, parentSelector, ...classes) {
+            this.src = src; // Источник изображения
+            this.alt = alt; // Альтернативный текст
+            this.title = title; // Заголовок
+            this.descr = descr; // Описание
+            this.price = price; // Цена
+            this.classes = classes; // Дополнительные классы
+            this.parent = document.querySelector(parentSelector); // Родительский элемент
+            this.transfer = 27; // Курс конвертации
+            this.changeToUAH(); // Конвертация цены в гривны
         }
 
-        element.innerHTML = `
+        changeToUAH() { // Конвертация валюты
+            this.price = this.price * this.transfer;
+        }
+
+        render() { // Рендеринг карточки на страницу
+            const element = document.createElement('div');
+
+            if (this.classes.length === 0) { // Если классы не переданы
+                this.classes = "menu__item";
+                element.classList.add(this.classes);
+            } else {
+                this.classes.forEach(className => element.classList.add(className));
+            }
+
+            element.innerHTML = `
                 <img src=${this.src} alt=${this.alt}>
                 <h3 class="menu__item-subtitle">${this.title}</h3>
                 <div class="menu__item-descr">${this.descr}</div>
@@ -198,113 +174,112 @@ class MenuCard {
                     <div class="menu__item-cost">Цена:</div>
                     <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
                 </div>
-        `; // Заполняем карточку данными
-        this.parent.append(element); // Добавляем карточку на страницу
+            `;
+            this.parent.append(element);
+        }
     }
-}
 
-new MenuCard(
-    "img/tabs/vegy.jpg", // Изображение
-    "vegy",              // Альтернативный текст
-    'Меню "Фитнес"',      // Заголовок
-    'Меню ”Фитнес” - это новый подход к приготовлению блюд...', // Описание
-    9,                   // Цена
-    '.menu .container',  // Родительский контейнер
-    'menu__item'         // Класс
-).render(); // Создаем и отображаем карточку
+    // Создаем экземпляры карточек меню
+    new MenuCard(
+        "img/tabs/vegy.jpg",
+        "vegy",
+        'Меню "Фитнес"',
+        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
+        9,
+        ".menu .container"
+    ).render();
 
-new MenuCard(
-    "img/tabs/elite.jpg",
-    "elite",
-    'Меню "Премиум"',
-    'В меню “Премиум” мы используем не только красивый дизайн упаковки...',
-    14,
-    '.menu .container',
-    'menu__item'
-).render();
+    new MenuCard(
+        "img/tabs/post.jpg",
+        "post",
+        'Меню "Постное"',
+        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
+        14,
+        ".menu .container"
+    ).render();
 
-new MenuCard(
-    "img/tabs/post.jpg",
-    "post",
-    'Меню "Постное"',
-    'Меню “Постное” - это тщательный подбор ингредиентов...',
-    21,
-    '.menu .container',
-    'menu__item'
-).render(); // Добавляем еще карточки
+    new MenuCard(
+        "img/tabs/elite.jpg",
+        "elite",
+        'Меню “Премиум”',
+        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
+        21,
+        ".menu .container"
+    ).render();
 
     // Forms
 
-    const forms = document.querySelectorAll('form');
-    const message = {
-        loading: 'img/form/spinner.svg',
-        success: 'Спасибо! Скоро мы с вами свяжемся',
-        failure: 'Что-то пошло не так...'
-    };
+const forms = document.querySelectorAll('form'); // Получаем все формы на странице
+const message = { // Объект для хранения сообщений
+    loading: 'img/form/spinner.svg', // Путь к изображению спиннера загрузки
+    success: 'Спасибо! Скоро мы с вами свяжемся', // Сообщение об успешной отправке
+    failure: 'Что-то пошло не так...' // Сообщение об ошибке
+};
 
-    forms.forEach(item => {
-        postData(item);
-    });
+forms.forEach(item => { 
+    postData(item); // Для каждой формы вызываем функцию отправки данных
+});
 
-    function postData(form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
+function postData(form) {
+    form.addEventListener('submit', (e) => { 
+        e.preventDefault(); // Отменяем стандартное поведение формы (перезагрузку страницы)
 
-            let statusMessage = document.createElement('img');
-            statusMessage.src = message.loading;
-            statusMessage.style.cssText = `
-                display: block;
-                margin: 0 auto;
-            `;
-            form.insertAdjacentElement('afterend', statusMessage);
+        let statusMessage = document.createElement('img'); // Создаем элемент img для отображения статуса
+        statusMessage.src = message.loading; // Устанавливаем изображение загрузки
+        statusMessage.style.cssText = ` 
+            display: block; 
+            margin: 0 auto; 
+        `; // Центрируем изображение
+        form.insertAdjacentElement('afterend', statusMessage); // Добавляем спиннер после формы
 
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-            const formData = new FormData(form);
+        const request = new XMLHttpRequest(); // Создаем новый XMLHttpRequest
+        request.open('POST', 'server.php'); // Настраиваем запрос: метод POST и адрес
+        request.setRequestHeader('Content-type', 'application/json; charset=utf-8'); // Устанавливаем заголовок для JSON
+        const formData = new FormData(form); // Собираем данные формы
 
-            const object = {};
-            formData.forEach(function (value, key) {
-                object[key] = value;
-            });
-            const json = JSON.stringify(object);
-
-            request.send(json);
-
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
-                    showThanksModal(message.success);
-                    statusMessage.remove();
-                    form.reset();
-                } else {
-                    showThanksModal(message.failure);
-                }
-            });
+        const object = {}; // Создаем объект для хранения данных формы
+        formData.forEach(function (value, key) {
+            object[key] = value; // Переносим данные из FormData в объект
         });
-    }
+        const json = JSON.stringify(object); // Преобразуем объект в JSON-строку
 
-    function showThanksModal(message) {
-        const prevModalDialog = document.querySelector('.modal__dialog');
+        request.send(json); // Отправляем JSON на сервер
 
-        prevModalDialog.classList.add('hide'); // Скрываем текущее модальное окно
-        openModal(); // Открываем модальное окно
+        request.addEventListener('load', () => { 
+            if (request.status === 200) { // Проверяем успешность ответа
+                console.log(request.response); // Логируем ответ сервера
+                showThanksModal(message.success); // Показываем сообщение об успехе
+                statusMessage.remove(); // Убираем спиннер
+                form.reset(); // Сбрасываем форму
+            } else { 
+                showThanksModal(message.failure); // Показываем сообщение об ошибке
+            }
+        });
+    });
+}
 
-        const thanksModal = document.createElement('div'); // Создаём новый div для окна благодарности
-        thanksModal.classList.add('modal__dialog'); // Добавляем класс модального окна
-        thanksModal.innerHTML = `
+// ShowThanksModal
+
+function showThanksModal(message) {
+    const prevModalDialog = document.querySelector('.modal__dialog'); // Находим текущий модальный диалог
+
+    prevModalDialog.classList.add('hide'); // Скрываем его
+    openModal(); // Открываем модальное окно
+
+    const thanksModal = document.createElement('div'); // Создаем новый div для сообщения
+    thanksModal.classList.add('modal__dialog'); // Добавляем класс для оформления
+    thanksModal.innerHTML = `
         <div class="modal__content">
-            <div class="modal__close" data-close>×</div> <!-- Кнопка закрытия -->
-            <div class="modal__title">${message}</div> <!-- Текст сообщения -->
+            <div class="modal__close" data-close>×</div> 
+            <div class="modal__title">${message}</div> 
         </div>
-    `;
-        document.querySelector('.modal').append(thanksModal); // Добавляем окно благодарности в модальное окно
-
-        setTimeout(() => {
-            thanksModal.remove(); // Удаляем окно благодарности через 4 секунды
-            prevModalDialog.classList.add('show'); // Возвращаем предыдущее модальное окно
-            prevModalDialog.classList.remove('hide'); // Убираем класс скрытия
-            closeModal(); // Закрываем модальное окно
-        }, 4000); // Таймер на 4 секунды
+    `; // Устанавливаем содержимое нового модального окна
+    document.querySelector('.modal').append(thanksModal); // Добавляем новый диалог в модальное окно
+    setTimeout(() => { 
+        thanksModal.remove(); // Убираем сообщение через 4 секунды
+        prevModalDialog.classList.add('show'); // Показываем старый диалог
+        prevModalDialog.classList.remove('hide'); // Убираем класс скрытия
+        closeModal(); // Закрываем модальное окно
+    }, 4000);
     }
 });
