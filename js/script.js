@@ -231,7 +231,7 @@ window.addEventListener('DOMContentLoaded', () => {
         21,
         '.menu .container',
         'menu__item'
-    ).render(); // Добавляем еще карточки
-
+    ).render(); // 
+    Добавляем еще карточки
 });
 
