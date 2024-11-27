@@ -237,54 +237,76 @@ new MenuCard(
 
     // Forms
 
-    const forms = document.querySelectorAll('form'); // Все формы на странице
-
+    const forms = document.querySelectorAll('form');
     const message = {
-        loading: 'Загрузка', // Сообщение при загрузке
-        success: 'Спасибо! Скоро мы с вами свяжемся', // Сообщение об успешной отправке
-        failure: 'Что-то пошло не так...' // Сообщение об ошибке
+        loading: 'img/form/spinner.svg',
+        success: 'Спасибо! Скоро мы с вами свяжемся',
+        failure: 'Что-то пошло не так...'
     };
 
     forms.forEach(item => {
-        postData(item); // Подключаем обработчик к каждой форме
+        postData(item);
     });
 
     function postData(form) {
-        form.addEventListener('submit', (e) => { // Событие при отправке формы
-            e.preventDefault(); // Отменяем стандартное поведение
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
 
-            const statusMessage = document.createElement('div'); // Создаем элемент для статуса
-            statusMessage.classList.add('status'); // Добавляем класс статуса
-            statusMessage.textContent = message.loading; // Устанавливаем сообщение о загрузке
-            form.append(statusMessage); // Добавляем сообщение в форму
+            let statusMessage = document.createElement('img');
+            statusMessage.src = message.loading;
+            statusMessage.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `;
+            form.insertAdjacentElement('afterend', statusMessage);
 
-            const request = new XMLHttpRequest(); // Создаем запрос
-            request.open('POST', 'server.php'); // Устанавливаем метод и адрес
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
+            const formData = new FormData(form);
 
-            request.setRequestHeader('Content-type', 'application/json'); // Устанавливаем заголовок
-            const formData = new FormData(form); // Считываем данные формы
-
-            const object = {}; // Создаем объект для данных
+            const object = {};
             formData.forEach(function (value, key) {
-                object[key] = value; // Преобразуем FormData в объект
+                object[key] = value;
             });
+            const json = JSON.stringify(object);
 
-            const json = JSON.stringify(object); // Преобразуем объект в JSON
+            request.send(json);
 
-            request.send(json); // Отправляем запрос
-
-            request.addEventListener('load', () => { // Отслеживаем загрузку ответа
-                if (request.status === 200) { // Если успешно
-                    console.log(request.response); // Логируем ответ
-                    statusMessage.textContent = message.success; // Сообщение об успехе
-                    form.reset(); // Сбрасываем форму
-                    setTimeout(() => {
-                        statusMessage.remove(); // Убираем сообщение
-                    }, 2000);
+            request.addEventListener('load', () => {
+                if (request.status === 200) {
+                    console.log(request.response);
+                    showThanksModal(message.success);
+                    statusMessage.remove();
+                    form.reset();
                 } else {
-                    statusMessage.textContent = message.failure; // Сообщение об ошибке
+                    showThanksModal(message.failure);
                 }
             });
         });
+    }
+
+    function showThanksModal(message) {
+        const prevModalDialog = document.querySelector('.modal__dialog');
+
+        prevModalDialog.classList.add('hide'); // Скрываем текущее модальное окно
+        openModal(); // Открываем модальное окно
+
+        const thanksModal = document.createElement('div'); // Создаём новый div для окна благодарности
+        thanksModal.classList.add('modal__dialog'); // Добавляем класс модального окна
+        thanksModal.innerHTML = `
+        <div class="modal__content">
+            <div class="modal__close" data-close>×</div> <!-- Кнопка закрытия -->
+            <div class="modal__title">${message}</div> <!-- Текст сообщения -->
+        </div>
+    `;
+        document.querySelector('.modal').append(thanksModal); // Добавляем окно благодарности в модальное окно
+
+        setTimeout(() => {
+            thanksModal.remove(); // Удаляем окно благодарности через 4 секунды
+            prevModalDialog.classList.add('show'); // Возвращаем предыдущее модальное окно
+            prevModalDialog.classList.remove('hide'); // Убираем класс скрытия
+            closeModal(); // Закрываем модальное окно
+        }, 4000); // Таймер на 4 секунды
     }
 });
