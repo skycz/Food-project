@@ -50,5 +50,68 @@ window.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+    
+    // Timer 
+
+    const deadline = '2024-12-23'; // Устанавливаем конечную дату таймера
+
+    function getTimeRemaining(endtime) {
+        let days, hours, minutes, seconds;
+        const t = Date.parse(endtime) - Date.parse(new Date()); // Разница между конечной и текущей датой
+
+        if (t <= 0) { // Если время вышло (разница времени меньше или равна 0)
+            days = 0; // Устанавливаем дни равными 0
+            hours = 0; // Устанавливаем часы равными 0
+            minutes = 0; // Устанавливаем минуты равными 0
+            seconds = 0; // Устанавливаем секунды равными 0
+        } else {
+            days = Math.floor(t / (1000 * 60 * 60 * 24)), // Переводим оставшееся время в дни
+                hours = Math.floor((t / (1000 * 60 * 60)) % 24), // Вычисляем оставшиеся часы
+                minutes = Math.floor((t / 1000 / 60) % 60), // Вычисляем оставшиеся минуты
+                seconds = Math.floor((t / 1000) % 60); // Вычисляем оставшиеся секунды
+        }
+
+        return {
+            'total': t, // Общее время до конца
+            'days': days, // Оставшиеся дни
+            'hours': hours, // Оставшиеся часы
+            'minutes': minutes, // Оставшиеся минуты
+            'seconds': seconds // Оставшиеся секунды
+        };
+    }
+
+    function getZero(num) { // Добавляет 0 перед однозначным числом
+        if (num >= 0 && num < 10) {
+            return `0${num}`; // Преобразует 5 в "05"
+        } else {
+            return num; // Возвращает число как есть
+        }
+    }
+
+    function setClock(selector, endtime) {
+        const timer = document.querySelector(selector), // Таймер на странице
+            days = timer.querySelector('#days'), // Блок для дней
+            hours = timer.querySelector('#hours'), // Блок для часов
+            minutes = timer.querySelector('#minutes'), // Блок для минут
+            seconds = timer.querySelector('#seconds'), // Блок для секунд
+            timeInterval = setInterval(updateClock, 1000); // Обновляем каждую секунду
+
+        updateClock(); // Первичное обновление для устранения задержки
+
+        function updateClock() { // Функция обновления значений таймера
+            const t = getTimeRemaining(endtime); // Получаем оставшееся время
+
+            days.textContent = getZero(t.days); // Записываем оставшиеся дни
+            hours.textContent = getZero(t.hours); // Записываем оставшиеся часы
+            minutes.textContent = getZero(t.minutes); // Записываем оставшиеся минуты
+            seconds.textContent = getZero(t.seconds); // Записываем оставшиеся секунды
+
+            if (t.total <= 0) { // Если время вышло
+                clearInterval(timeInterval); // Останавливаем таймер
+            }
+        }
+    }
+
+    setClock('.timer', deadline); // Запускаем таймер с конечной датой
 });
 
