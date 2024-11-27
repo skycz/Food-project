@@ -118,18 +118,16 @@ window.addEventListener('DOMContentLoaded', () => {
 
 const modalTrigger = document.querySelectorAll('[data-modal]'), // Кнопки открытия модального окна
       modal = document.querySelector('.modal'), // Модальное окно
-      modalCloseBtn = document.querySelector('[data-close]'); // Кнопка закрытия окна
-
-function openModal() {
-    modal.classList.add('show'); // Показываем модальное окно
-    modal.classList.remove('hide'); // Убираем класс скрытия
-    document.body.style.overflow = 'hidden'; // Блокируем прокрутку страницы
-    clearInterval(modalTimerId); // Убираем таймер открытия
-}
 
 modalTrigger.forEach(btn => {
     btn.addEventListener('click', openModal); // Обработчик клика для кнопок открытия окна
 });
+
+function openModal() {
+    modal.classList.add('show'); // Показываем модальное окно
+    modal.classList.remove('hide'); // Убираем класс скрытия
+    document.body.style.overflow = ''; // Блокируем прокрутку страницы
+}
 
 function closeModal() {
     modal.classList.add('hide'); // Добавляем класс скрытия
@@ -151,7 +149,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-const modalTimerId = setTimeout(openModal, 5000); // Автоматическое открытие через 5 секунд
+const modalTimerId = setTimeout(openModal, 50000); // Автоматическое открытие через 5 секунд
 
 function showModalByScroll() {
     if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) { // Скролл до конца страницы
