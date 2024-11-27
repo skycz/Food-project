@@ -235,4 +235,6 @@ new MenuCard(
     'menu__item'
 ).render(); // Добавляем еще карточки
 
+});
+
 
