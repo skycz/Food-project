@@ -275,4 +275,4 @@ function showThanksModal(message) {
         closeModal(); // Закрываем модальное окно
     }, 4000);
 }
-
+});
