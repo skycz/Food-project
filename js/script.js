@@ -232,54 +232,47 @@ function postData(form) {
         `; // Центрируем изображение
         form.insertAdjacentElement('afterend', statusMessage); // Добавляем спиннер после формы
 
-        const request = new XMLHttpRequest(); // Создаем новый XMLHttpRequest
-        request.open('POST', 'server.php'); // Настраиваем запрос: метод POST и адрес
-        request.setRequestHeader('Content-type', 'application/json; charset=utf-8'); // Устанавливаем заголовок для JSON
-        const formData = new FormData(form); // Собираем данные формы
+// fetch API
 
-        const object = {}; // Создаем объект для хранения данных формы
-        formData.forEach(function (value, key) {
-            object[key] = value; // Переносим данные из FormData в объект
-        });
-        const json = JSON.stringify(object); // Преобразуем объект в JSON-строку
-
-        request.send(json); // Отправляем JSON на сервер
-
-        request.addEventListener('load', () => { 
-            if (request.status === 200) { // Проверяем успешность ответа
-                console.log(request.response); // Логируем ответ сервера
-                showThanksModal(message.success); // Показываем сообщение об успехе
-                statusMessage.remove(); // Убираем спиннер
-                form.reset(); // Сбрасываем форму
-            } else { 
-                showThanksModal(message.failure); // Показываем сообщение об ошибке
-            }
-        });
+fetch('server1.php', { // Отправляем запрос на сервер
+    method: 'POST', // Указываем метод POST
+    headers: { 
+        'Content-type': 'application/json' // Устанавливаем заголовок Content-Type
+    },
+    body: JSON.stringify(object) // Передаем данные в формате JSON
+})
+    .then(data => data.text()) // Преобразуем ответ в текст
+    .then(data => { 
+        console.log(data); // Логируем ответ сервера
+        showThanksModal(message.success); // Показываем сообщение об успешной отправке
+        statusMessage.remove(); // Удаляем индикатор загрузки
+    }).catch(() => { 
+        showThanksModal(message.failure); // Показываем сообщение об ошибке
+    }).finally(() => { 
+        form.reset(); // Сбрасываем форму
     });
-}
+});
 
-// ShowThanksModal
-
-function showThanksModal(message) {
+function showThanksModal(message) { 
     const prevModalDialog = document.querySelector('.modal__dialog'); // Находим текущий модальный диалог
 
-    prevModalDialog.classList.add('hide'); // Скрываем его
+    prevModalDialog.classList.add('hide'); // Скрываем текущий модальный диалог
     openModal(); // Открываем модальное окно
 
-    const thanksModal = document.createElement('div'); // Создаем новый div для сообщения
-    thanksModal.classList.add('modal__dialog'); // Добавляем класс для оформления
-    thanksModal.innerHTML = `
+    const thanksModal = document.createElement('div'); // Создаем новый диалог
+    thanksModal.classList.add('modal__dialog'); // Добавляем класс
+    thanksModal.innerHTML = ` 
         <div class="modal__content">
             <div class="modal__close" data-close>×</div> 
             <div class="modal__title">${message}</div> 
         </div>
-    `; // Устанавливаем содержимое нового модального окна
-    document.querySelector('.modal').append(thanksModal); // Добавляем новый диалог в модальное окно
+    `; // Устанавливаем содержимое модального окна
+    document.querySelector('.modal').append(thanksModal); // Добавляем на страницу
     setTimeout(() => { 
-        thanksModal.remove(); // Убираем сообщение через 4 секунды
-        prevModalDialog.classList.add('show'); // Показываем старый диалог
+        thanksModal.remove(); // Удаляем новый диалог через 4 секунды
+        prevModalDialog.classList.add('show'); // Возвращаем предыдущий диалог
         prevModalDialog.classList.remove('hide'); // Убираем класс скрытия
         closeModal(); // Закрываем модальное окно
     }, 4000);
-    }
-});
+}
+
