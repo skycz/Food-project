@@ -41,7 +41,7 @@ window.addEventListener('DOMContentLoaded', function () {
 
     // Timer
 
-    const deadline = '2022-06-11';
+    const deadline = '2024-12-23';
 
     function getTimeRemaining(endtime) {
         const t = Date.parse(endtime) - Date.parse(new Date()),
@@ -128,7 +128,7 @@ window.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    const modalTimerId = setTimeout(openModal, 300000);
+    const modalTimerId = setTimeout(openModal, 50000);
     // Изменил значение, чтобы не отвлекало
 
     function showModalByScroll() {
@@ -234,29 +234,25 @@ window.addEventListener('DOMContentLoaded', function () {
             `;
             form.insertAdjacentElement('afterend', statusMessage);
 
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
-            request.setRequestHeader('Content-type', 'application/json; charset=utf-8');
-            const formData = new FormData(form);
+            // fetch API
 
-            const object = {};
-            formData.forEach(function (value, key) {
-                object[key] = value;
-            });
-            const json = JSON.stringify(object);
-
-            request.send(json);
-
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.response);
+            fetch('server1.php', {
+                method: 'POST',
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(object)
+            })
+                .then(data => data.text())
+                .then(data => {
+                    console.log(data);
                     showThanksModal(message.success);
                     statusMessage.remove();
-                    form.reset();
-                } else {
+                }).catch(() => {
                     showThanksModal(message.failure);
-                }
-            });
+                }).finally(() => {
+                    form.reset();
+                });
         });
     }
 
