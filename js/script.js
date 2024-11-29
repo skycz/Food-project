@@ -136,143 +136,147 @@ window.addEventListener('DOMContentLoaded', function () {
     }
     window.addEventListener('scroll', showModalByScroll);
 
-    // Используем классы для создание карточек меню
+// Асинхронная функция для получения данных с сервера
+const getResource = async (url) => {
+    const res = await fetch(url); // Выполняем GET-запрос по указанному URL
 
-    class MenuCard { // Создаем класс для карточек
-        constructor(src, alt, title, descr, price, parentSelector, ...classes) {
-            this.src = src; // Источник изображения
-            this.alt = alt; // Альтернативный текст
-            this.title = title; // Заголовок
-            this.descr = descr; // Описание
-            this.price = price; // Цена
-            this.classes = classes; // Дополнительные классы
-            this.parent = document.querySelector(parentSelector); // Родительский элемент
-            this.transfer = 27; // Курс конвертации
-            this.changeToUAH(); // Конвертация цены в гривны
-        }
-
-        changeToUAH() { // Конвертация валюты
-            this.price = this.price * this.transfer;
-        }
-
-        render() { // Рендеринг карточки на страницу
-            const element = document.createElement('div');
-
-            if (this.classes.length === 0) { // Если классы не переданы
-                this.classes = "menu__item";
-                element.classList.add(this.classes);
-            } else {
-                this.classes.forEach(className => element.classList.add(className));
-            }
-
-            element.innerHTML = `
-                <img src=${this.src} alt=${this.alt}>
-                <h3 class="menu__item-subtitle">${this.title}</h3>
-                <div class="menu__item-descr">${this.descr}</div>
-                <div class="menu__item-divider"></div>
-                <div class="menu__item-price">
-                    <div class="menu__item-cost">Цена:</div>
-                    <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
-                </div>
-            `;
-            this.parent.append(element);
-        }
+    if (!res.ok) { // Проверяем статус ответа
+        throw new Error(`Could not fetch ${url}, status: ${res.status}`); // Если ошибка, выбрасываем исключение
     }
 
-    // Создаем экземпляры карточек меню
-    new MenuCard(
-        "img/tabs/vegy.jpg",
-        "vegy",
-        'Меню "Фитнес"',
-        'Меню "Фитнес" - это новый подход к приготовлению блюд: больше свежих овощей и фруктов. Продукт активных и здоровых людей. Это абсолютно новый продукт с оптимальной ценой и высоким качеством!',
-        9,
-        ".menu .container"
-    ).render();
+    return await res.json(); // Парсим и возвращаем JSON-ответ
+};
 
-    new MenuCard(
-        "img/tabs/post.jpg",
-        "post",
-        'Меню "Постное"',
-        'Меню “Постное” - это тщательный подбор ингредиентов: полное отсутствие продуктов животного происхождения, молоко из миндаля, овса, кокоса или гречки, правильное количество белков за счет тофу и импортных вегетарианских стейков.',
-        14,
-        ".menu .container"
-    ).render();
+// Класс для создания карточек меню
+class MenuCard {
+    constructor(src, alt, title, descr, price, parentSelector, ...classes) {
+        this.src = src; // Путь к изображению
+        this.alt = alt; // Альтернативный текст изображения
+        this.title = title; // Заголовок карточки
+        this.descr = descr; // Описание карточки
+        this.price = price; // Цена
+        this.classes = classes; // CSS-классы
+        this.parent = document.querySelector(parentSelector); // Родительский элемент
+        this.transfer = 27; // Курс валют
+        this.changeToUAH(); // Преобразование цены в гривны
+    }
 
-    new MenuCard(
-        "img/tabs/elite.jpg",
-        "elite",
-        'Меню “Премиум”',
-        'В меню “Премиум” мы используем не только красивый дизайн упаковки, но и качественное исполнение блюд. Красная рыба, морепродукты, фрукты - ресторанное меню без похода в ресторан!',
-        21,
-        ".menu .container"
-    ).render();
+    changeToUAH() {
+        this.price = this.price * this.transfer; // Конвертация цены
+    }
 
-    // Forms
+    render() {
+        const element = document.createElement('div'); // Создаём контейнер для карточки
 
-const forms = document.querySelectorAll('form'); // Получаем все формы на странице
-const message = { // Объект для хранения сообщений
-    loading: 'img/form/spinner.svg', // Путь к изображению спиннера загрузки
-    success: 'Спасибо! Скоро мы с вами свяжемся', // Сообщение об успешной отправке
+        if (this.classes.length === 0) { // Если классы не указаны
+            this.classes = "menu__item"; // Применяем класс по умолчанию
+            element.classList.add(this.classes); // Добавляем класс
+        } else {
+            this.classes.forEach(className => element.classList.add(className)); // Добавляем переданные классы
+        }
+
+        element.innerHTML = `
+            <img src=${this.src} alt=${this.alt}> <!-- Изображение -->
+            <h3 class="menu__item-subtitle">${this.title}</h3> <!-- Заголовок -->
+            <div class="menu__item-descr">${this.descr}</div> <!-- Описание -->
+            <div class="menu__item-divider"></div> <!-- Разделитель -->
+            <div class="menu__item-price">
+                <div class="menu__item-cost">Цена:</div>
+                <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+            </div>
+        `;
+        this.parent.append(element); // Добавляем элемент в родителя
+    }
+}
+
+// Получаем данные для карточек меню с сервера
+getResource('http://localhost:3000/menu')
+    .then(data => {
+        data.forEach(({ img, altimg, title, descr, price }) => { // Перебираем данные
+            new MenuCard(img, altimg, title, descr, price, '.menu .container').render(); // Создаём карточку
+        });
+    });
+
+// Работа с формами
+const forms = document.querySelectorAll('form'); // Получаем все формы
+const message = {
+    loading: 'img/form/spinner.svg', // Сообщение о загрузке
+    success: 'Спасибо! Скоро мы с вами свяжемся', // Успешное сообщение
     failure: 'Что-то пошло не так...' // Сообщение об ошибке
 };
 
-forms.forEach(item => { 
-    postData(item); // Для каждой формы вызываем функцию отправки данных
+forms.forEach(item => {
+    bindPostData(item); // Привязываем обработчик к каждой форме
 });
 
-function postData(form) {
-    form.addEventListener('submit', (e) => { 
-        e.preventDefault(); // Отменяем стандартное поведение формы (перезагрузку страницы)
-
-        let statusMessage = document.createElement('img'); // Создаем элемент img для отображения статуса
-        statusMessage.src = message.loading; // Устанавливаем изображение загрузки
-        statusMessage.style.cssText = ` 
-            display: block; 
-            margin: 0 auto; 
-        `; // Центрируем изображение
-        form.insertAdjacentElement('afterend', statusMessage); // Добавляем спиннер после формы
-
-// fetch API
-
-fetch('server1.php', { // Отправляем запрос на сервер
-    method: 'POST', // Указываем метод POST
-    headers: { 
-        'Content-type': 'application/json' // Устанавливаем заголовок Content-Type
-    },
-    body: JSON.stringify(object) // Передаем данные в формате JSON
-})
-    .then(data => data.text()) // Преобразуем ответ в текст
-    .then(data => { 
-        console.log(data); // Логируем ответ сервера
-        showThanksModal(message.success); // Показываем сообщение об успешной отправке
-        statusMessage.remove(); // Удаляем индикатор загрузки
-    }).catch(() => { 
-        showThanksModal(message.failure); // Показываем сообщение об ошибке
-    }).finally(() => { 
-        form.reset(); // Сбрасываем форму
+// Асинхронная функция для отправки данных на сервер
+const postData = async (url, data) => {
+    const res = await fetch(url, { // Выполняем POST-запрос
+        method: 'POST', // Метод запроса
+        headers: {
+            'Content-type': 'application/json' // Указываем тип данных
+        },
+        body: data // Передаём тело запроса
     });
-});
 
-function showThanksModal(message) { 
-    const prevModalDialog = document.querySelector('.modal__dialog'); // Находим текущий модальный диалог
+    return await res.json(); // Возвращаем ответ
+};
 
-    prevModalDialog.classList.add('hide'); // Скрываем текущий модальный диалог
-    openModal(); // Открываем модальное окно
+// Функция обработки отправки формы
+function bindPostData(form) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault(); // Отменяем стандартное поведение формы
 
-    const thanksModal = document.createElement('div'); // Создаем новый диалог
-    thanksModal.classList.add('modal__dialog'); // Добавляем класс
-    thanksModal.innerHTML = ` 
-        <div class="modal__content">
-            <div class="modal__close" data-close>×</div> 
-            <div class="modal__title">${message}</div> 
-        </div>
-    `; // Устанавливаем содержимое модального окна
-    document.querySelector('.modal').append(thanksModal); // Добавляем на страницу
-    setTimeout(() => { 
-        thanksModal.remove(); // Удаляем новый диалог через 4 секунды
-        prevModalDialog.classList.add('show'); // Возвращаем предыдущий диалог
-        prevModalDialog.classList.remove('hide'); // Убираем класс скрытия
-        closeModal(); // Закрываем модальное окно
-    }, 4000);
+        let statusMessage = document.createElement('img'); // Создаём изображение для статуса
+        statusMessage.src = message.loading; // Устанавливаем путь к изображению
+        statusMessage.style.cssText = `
+            display: block;
+            margin: 0 auto;
+        `;
+        form.insertAdjacentElement('afterend', statusMessage); // Добавляем изображение рядом с формой
+
+        const formData = new FormData(form); // Собираем данные формы
+        const json = JSON.stringify(Object.fromEntries(formData.entries())); // Преобразуем данные в JSON
+
+        postData('http://localhost:3000/requests', json) // Отправляем данные на сервер
+            .then(data => {
+                console.log(data); // Логируем ответ сервера
+                showThanksModal(message.success); // Показываем сообщение об успехе
+                statusMessage.remove(); // Убираем индикатор загрузки
+            }).catch(() => {
+                showThanksModal(message.failure); // Показываем сообщение об ошибке
+            }).finally(() => {
+                form.reset(); // Сбрасываем форму
+            });
+    });
 }
+
+// Функция показа модального окна с сообщением
+function showThanksModal(message) {
+    const prevModalDialog = document.querySelector('.modal__dialog'); // Находим текущее модальное окно
+
+    prevModalDialog.classList.add('hide'); // Скрываем его
+    openModal(); // Показываем модальное окно
+
+    const thanksModal = document.createElement('div'); // Создаём новый контейнер для сообщения
+    thanksModal.classList.add('modal__dialog'); // Применяем класс
+    thanksModal.innerHTML = `
+        <div class="modal__content">
+            <div class="modal__close" data-close>×</div> <!-- Кнопка закрытия -->
+            <div class="modal__title">${message}</div> <!-- Сообщение -->
+        </div>
+    `;
+    document.querySelector('.modal').append(thanksModal); // Добавляем элемент на страницу
+    setTimeout(() => {
+        thanksModal.remove(); // Убираем сообщение
+        prevModalDialog.classList.add('show'); // Показываем прежнее окно
+        prevModalDialog.classList.remove('hide');
+        closeModal(); // Закрываем модальное окно
+    }, 4000); // Таймер на 4 секунды
+}
+
+// Пример GET-запроса для проверки данных
+fetch('http://localhost:3000/menu')
+    .then(data => data.json()) // Парсим JSON
+    .then(res => console.log(res)); // Логируем результат
 });
