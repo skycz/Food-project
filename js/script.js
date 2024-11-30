@@ -139,17 +139,6 @@ window.addEventListener('DOMContentLoaded', function () {
     }
     window.addEventListener('scroll', showModalByScroll);
 
-    // async, await (GET)
-    const getResource = async (url) => {
-        const res = await fetch(url);
-
-        if (!res.ok) {
-            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
-        }
-
-        return await res.json();
-    };
-
     // Используем классы для создание карточек меню
 
     class MenuCard {
@@ -193,13 +182,6 @@ window.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    getResource('http://localhost:3000/menu')
-        .then(data => {
-            data.forEach(({ img, altimg, title, descr, price }) => {
-                new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
-            });
-        });
-
     // Forms
 
     const forms = document.querySelectorAll('form');
@@ -212,6 +194,25 @@ window.addEventListener('DOMContentLoaded', function () {
     forms.forEach(item => {
         bindPostData(item);
     });
+
+    // async, await (GET)
+    const getResource = async (url) => {
+        const res = await fetch(url);
+
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
+        }
+
+        return await res.json();
+    };
+    
+    getResource('http://localhost:3000/menu')
+        .then(data => {
+            data.forEach(({ img, altimg, title, descr, price }) => {
+                new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        });
+
 
     // async, await (POST)
     const postData = async (url, data) => {
