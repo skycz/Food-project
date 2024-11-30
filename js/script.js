@@ -178,102 +178,168 @@ class MenuCard {
     }
 }
 
+// Загружаем данные меню с помощью axios
+axios.get('http://localhost:3000/menu') // Выполняем запрос на получение данных с указанного URL
+    .then(data => { 
+        // Перебираем массив данных и создаём карточки меню
+        data.data.forEach(({ img, altimg, title, descr, price }) => {
+            new MenuCard(img, altimg, title, descr, price, '.menu .container').render(); // Создание и рендеринг карточек меню
+        });
+    });
+
 // Работа с формами
-const forms = document.querySelectorAll('form'); // Находим все формы на странице
+const forms = document.querySelectorAll('form'); // Выбираем все формы на странице
 const message = {
-    loading: 'img/form/spinner.svg', // Сообщение о загрузке
+    loading: 'img/form/spinner.svg', // Сообщение о загрузке (анимация)
     success: 'Спасибо! Скоро мы с вами свяжемся', // Сообщение об успешной отправке
     failure: 'Что-то пошло не так...' // Сообщение об ошибке
 };
 
-forms.forEach(item => { // Привязываем обработчик к каждой форме
-    bindPostData(item);
+// Для каждой формы вызываем функцию обработки
+forms.forEach(item => {
+    bindPostData(item); // Привязываем обработчик событий
 });
 
-// async, await (POST)
+// Функция для отправки данных с помощью async/await (POST)
 const postData = async (url, data) => {
-    const res = await fetch(url, { // Отправляем POST-запрос на сервер
-        method: 'POST',
+    const res = await fetch(url, { 
+        method: 'POST', // Метод POST
         headers: {
-            'Content-type': 'application/json' // Указываем тип данных
+            'Content-type': 'application/json' // Устанавливаем заголовок Content-Type
         },
-        body: data // Передаем тело запроса
+        body: data // Тело запроса в формате JSON
     });
 
-    return await res.json(); // Возвращаем результат в виде JSON
+    return await res.json(); // Возвращаем результат в формате JSON
 };
 
-// async, await (GET)
+// Функция для получения данных с помощью async/await (GET)
 const getResource = async (url) => {
-    const res = await fetch(url); // Выполняем GET-запрос на сервер
+    const res = await fetch(url); // Выполняем GET-запрос
 
-    if (!res.ok) { // Проверяем успешность запроса
-        throw new Error(`Could not fetch ${url}, status: ${res.status}`); // Выбрасываем ошибку при неудаче
+    if (!res.ok) { // Проверяем статус ответа
+        throw new Error(`Could not fetch ${url}, status: ${res.status}`); // Бросаем ошибку, если ответ не успешен
     }
 
-    return await res.json(); // Возвращаем результат в виде JSON
+    return await res.json(); // Возвращаем результат в формате JSON
 };
 
-getResource('http://localhost:3000/menu') // Получаем данные для карточек меню
+// Комментируем альтернативный способ загрузки данных меню через getResource
+/*
+getResource('http://localhost:3000/menu')
     .then(data => {
-        data.forEach(({ img, altimg, title, descr, price }) => { // Перебираем данные и создаем карточки
+        data.forEach(({ img, altimg, title, descr, price }) => {
             new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
         });
     });
+*/
 
-function bindPostData(form) { // Привязываем отправку данных к форме
-    form.addEventListener('submit', (e) => { // Событие отправки формы
-        e.preventDefault(); // Отменяем стандартное поведение браузера
+// Функция привязки отправки данных формы
+function bindPostData(form) {
+    form.addEventListener('submit', (e) => { 
+        e.preventDefault(); // Предотвращаем стандартное поведение браузера (перезагрузку)
 
-        let statusMessage = document.createElement('img'); // Создаем элемент для сообщения о статусе
-        statusMessage.src = message.loading; // Устанавливаем путь к изображению загрузки
-        statusMessage.style.cssText = ` 
+        let statusMessage = document.createElement('img'); // Создаём элемент для отображения статуса
+        statusMessage.src = message.loading; // Указываем путь к анимации загрузки
+        statusMessage.style.cssText = `
             display: block;
             margin: 0 auto;
         `;
-        form.insertAdjacentElement('afterend', statusMessage); // Добавляем сообщение после формы
+        form.insertAdjacentElement('afterend', statusMessage); // Добавляем анимацию под формой
 
-        const formData = new FormData(form); // Считываем данные формы
-
-        const json = JSON.stringify(Object.fromEntries(formData.entries())); // Конвертируем данные формы в JSON
+        const formData = new FormData(form); // Создаём объект FormData из данных формы
+        const json = JSON.stringify(Object.fromEntries(formData.entries())); // Преобразуем FormData в JSON
 
         postData('http://localhost:3000/requests', json) // Отправляем данные на сервер
             .then(data => {
-                console.log(data); // Логируем ответ от сервера
+                console.log(data); // Логируем ответ сервера
                 showThanksModal(message.success); // Показываем сообщение об успешной отправке
-                statusMessage.remove(); // Удаляем индикатор загрузки
+                statusMessage.remove(); // Удаляем анимацию загрузки
             }).catch(() => {
                 showThanksModal(message.failure); // Показываем сообщение об ошибке
             }).finally(() => {
-                form.reset(); // Очищаем форму
+                form.reset(); // Сбрасываем данные формы
             });
     });
 }
 
-function showThanksModal(message) { // Отображаем модальное окно с сообщением
-    const prevModalDialog = document.querySelector('.modal__dialog'); // Находим текущее модальное окно
+// Функция для показа модального окна с благодарностью
+function showThanksModal(message) {
+    const prevModalDialog = document.querySelector('.modal__dialog'); // Получаем текущее модальное окно
 
-    prevModalDialog.classList.add('hide'); // Прячем старое окно
-    openModal(); // Открываем новое окно
+    prevModalDialog.classList.add('hide'); // Скрываем старое окно
+    openModal(); // Открываем модальное окно
 
-    const thanksModal = document.createElement('div'); // Создаем контейнер для сообщения
+    const thanksModal = document.createElement('div'); // Создаём новое окно
     thanksModal.classList.add('modal__dialog'); // Добавляем класс
-    thanksModal.innerHTML = ` 
+    thanksModal.innerHTML = `
         <div class="modal__content">
             <div class="modal__close" data-close>×</div>
             <div class="modal__title">${message}</div>
         </div>
     `;
-    document.querySelector('.modal').append(thanksModal); // Добавляем сообщение в модальное окно
-    setTimeout(() => { // Закрываем окно через 4 секунды
-        thanksModal.remove(); // Удаляем новое окно
-        prevModalDialog.classList.add('show'); // Показываем старое окно
-        prevModalDialog.classList.remove('hide'); // Убираем класс скрытия
+    document.querySelector('.modal').append(thanksModal); // Вставляем новое окно в DOM
+
+    setTimeout(() => {
+        thanksModal.remove(); // Удаляем новое окно через 4 секунды
+        prevModalDialog.classList.add('show'); // Возвращаем старое окно
+        prevModalDialog.classList.remove('hide');
         closeModal(); // Закрываем модальное окно
     }, 4000);
 }
 
-fetch('http://localhost:3000/menu') // Тестовый запрос данных
-    .then(data => data.json()) // Преобразуем ответ в JSON
-    .then(res => console.log(res)); // Логируем результат
+// Получаем данные меню и логируем в консоль
+fetch('http://localhost:3000/menu')
+    .then(data => data.json())
+    .then(res => console.log(res));
+
+// Слайдер
+const slides = document.querySelectorAll('.offer__slide'), // Получаем все слайды
+    prev = document.querySelector('.offer__slider-prev'), // Кнопка "назад"
+    next = document.querySelector('.offer__slider-next'), // Кнопка "вперед"
+    total = document.querySelector('#total'), // Общее количество слайдов
+    current = document.querySelector('#current'); // Текущий номер слайда
+let slideIndex = 1; // Индекс текущего слайда
+
+showSlides(slideIndex); // Инициализируем показ слайдов
+
+if (slides.length < 10) {
+    total.textContent = `0${slides.length}`; // Если меньше 10 слайдов, добавляем ведущий 0
+} else {
+    total.textContent = slides.length; // В противном случае отображаем число
+}
+
+// Функция для показа слайдов
+function showSlides(n) {
+    if (n > slides.length) { 
+        slideIndex = 1; // Возврат к первому слайду, если превышен индекс
+    }
+
+    if (n < 1) {
+        slideIndex = slides.length; // Возврат к последнему слайду, если индекс меньше 1
+    }
+
+    slides.forEach(item => item.style.display = 'none'); // Скрываем все слайды
+
+    slides[slideIndex - 1].style.display = 'block'; // Показываем текущий слайд
+
+    if (slides.length < 10) {
+        current.textContent = `0${slideIndex}`; // Если меньше 10, добавляем ведущий 0
+    } else {
+        current.textContent = slideIndex; // В противном случае отображаем число
+    }
+}
+
+// Функция для перехода между слайдами
+function plusSlides(n) {
+    showSlides(slideIndex += n); // Изменяем индекс и показываем новый слайд
+}
+
+// Обработчики событий для кнопок "вперед" и "назад"
+prev.addEventListener('click', () => {
+    plusSlides(-1); // Переход на предыдущий слайд
+});
+next.addEventListener('click', () => {
+    plusSlides(1); // Переход на следующий слайд
+    });
 });
