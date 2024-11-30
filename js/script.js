@@ -184,6 +184,19 @@ window.addEventListener('DOMContentLoaded', function () {
 
     // Forms
 
+    axios.get('http://localhost:3000/menu')
+        .then(data => {
+            data.data.forEach(({
+                img,
+                altimg,
+                title,
+                descr,
+                price
+            }) => {
+                new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        });
+
     const forms = document.querySelectorAll('form');
     const message = {
         loading: 'img/form/spinner.svg',
@@ -194,25 +207,6 @@ window.addEventListener('DOMContentLoaded', function () {
     forms.forEach(item => {
         bindPostData(item);
     });
-
-    // async, await (GET)
-    const getResource = async (url) => {
-        const res = await fetch(url);
-
-        if (!res.ok) {
-            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
-        }
-
-        return await res.json();
-    };
-    
-    getResource('http://localhost:3000/menu')
-        .then(data => {
-            data.forEach(({ img, altimg, title, descr, price }) => {
-                new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
-            });
-        });
-
 
     // async, await (POST)
     const postData = async (url, data) => {
@@ -226,6 +220,24 @@ window.addEventListener('DOMContentLoaded', function () {
 
         return await res.json();
     };
+
+    // async, await (GET)
+    const getResource = async (url) => {
+        const res = await fetch(url);
+
+        if (!res.ok) {
+            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
+        }
+
+        return await res.json();
+    };
+
+    /* getResource('http://localhost:3000/menu')
+        .then(data => {
+            data.forEach(({ img, altimg, title, descr, price }) => {
+                new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
+            });
+        }); */
 
     function bindPostData(form) {
         form.addEventListener('submit', (e) => {
