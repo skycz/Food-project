@@ -296,16 +296,18 @@ window.addEventListener('DOMContentLoaded', function () {
 
     // Slider 2
 
+    let slideIndex = 1;
+    let offset = 0;
+
     const slides = document.querySelectorAll('.offer__slide'),
         slider = document.querySelector('.offer__slider'),
         prev = document.querySelector('.offer__slider-prev'),
         next = document.querySelector('.offer__slider-next'),
         total = document.querySelector('#total'),
-        current = document.querySelector('#current');
+        current = document.querySelector('#current'),
         slidesWrapper = document.querySelector('.offer__slider-wrapper'),
         slidesField = document.querySelector('.offer__slider-inner'),
         width = window.getComputedStyle(slidesWrapper).width;
-
 
     if (slides.length < 10) {
         total.textContent = `0${slides.length}`;
@@ -353,14 +355,14 @@ window.addEventListener('DOMContentLoaded', function () {
     function moveSlide(offset, slideIndex, slidesField, dots, current) {
         slidesField.style.transform = `translateX(-${offset}px)`;
 
-        if (slides.length < 10) {
-            current.textContent = `0${slideIndex}`;
-        } else {
-            current.textContent = slideIndex;
+        if (dots) {
+            dots.forEach(dot => dot.style.opacity = '0.5');
+            dots[slideIndex - 1].style.opacity = '1';
         }
 
-        dots.forEach(dot => dot.style.opacity = '0.5');
-        dots[slideIndex - 1].style.opacity = '1';
+        if (current) {
+            current.textContent = slides.length < 10 ? `0${slideIndex}` : slideIndex;
+        }
     }
 
     next.addEventListener('click', () => {
