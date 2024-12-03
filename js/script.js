@@ -293,53 +293,153 @@ fetch('http://localhost:3000/menu')
     .then(data => data.json())
     .then(res => console.log(res));
 
-// Слайдер
-const slides = document.querySelectorAll('.offer__slide'), // Получаем все слайды
-    prev = document.querySelector('.offer__slider-prev'), // Кнопка "назад"
-    next = document.querySelector('.offer__slider-next'), // Кнопка "вперед"
-    total = document.querySelector('#total'), // Общее количество слайдов
-    current = document.querySelector('#current'); // Текущий номер слайда
-let slideIndex = 1; // Индекс текущего слайда
+// Slider 2
 
-showSlides(slideIndex); // Инициализируем показ слайдов
+const slides = document.querySelectorAll('.offer__slide'), // Все слайды
+      slider = document.querySelector('.offer__slider'), // Контейнер слайдера
+      prev = document.querySelector('.offer__slider-prev'), // Кнопка "назад"
+      next = document.querySelector('.offer__slider-next'), // Кнопка "вперёд"
+      total = document.querySelector('#total'), // Элемент для отображения общего числа слайдов
+      current = document.querySelector('#current'), // Элемент для отображения текущего слайда
+      slidesWrapper = document.querySelector('.offer__slider-wrapper'), // Обёртка для слайдов
+      slidesField = document.querySelector('.offer__slider-inner'), // Поле, содержащее все слайды
+      width = window.getComputedStyle(slidesWrapper).width; // Ширина обёртки слайдов
 
 if (slides.length < 10) {
-    total.textContent = `0${slides.length}`; // Если меньше 10 слайдов, добавляем ведущий 0
+    total.textContent = `0${slides.length}`; // Если слайдов меньше 10, добавляем ведущий ноль
+    current.textContent = `0${slideIndex}`; // Устанавливаем текущий слайд с ведущим нулём
 } else {
-    total.textContent = slides.length; // В противном случае отображаем число
+    total.textContent = slides.length; // Устанавливаем общее число слайдов
+    current.textContent = slideIndex; // Устанавливаем текущий слайд
 }
 
-// Функция для показа слайдов
-function showSlides(n) {
-    if (n > slides.length) { 
-        slideIndex = 1; // Возврат к первому слайду, если превышен индекс
+slidesField.style.width = 100 * slides.length + '%'; // Устанавливаем ширину поля для всех слайдов
+slidesField.style.display = 'flex'; // Размещаем слайды в строку
+slidesField.style.transition = '0.5s all'; // Добавляем плавный переход между слайдами
+
+slidesWrapper.style.overflow = 'hidden'; // Прячем слайды за границами обёртки
+
+slides.forEach(slide => {
+    slide.style.width = width; // Устанавливаем одинаковую ширину каждому слайду
+});
+
+slider.style.position = 'relative'; // Устанавливаем позиционирование для слайдера
+
+const indicators = document.createElement('ol'), // Создаём контейнер для индикаторов (точек)
+    dots = []; // Массив для хранения индикаторов
+indicators.classList.add('carousel-indicators'); // Добавляем класс для индикаторов
+
+slider.append(indicators); // Вставляем индикаторы в слайдер
+
+for (let i = 0; i < slides.length; i++) {
+    const dot = document.createElement('li'); // Создаём отдельный индикатор
+    dot.classList.add('li-dot'); // Добавляем класс для индикатора
+    dot.setAttribute('data-slide-to', i + 1); // Устанавливаем атрибут для привязки к слайду
+
+    if (i == 0) {
+        dot.classList.add('active'); // Активируем первую точку
     }
 
-    if (n < 1) {
-        slideIndex = slides.length; // Возврат к последнему слайду, если индекс меньше 1
-    }
+    indicators.append(dot); // Добавляем индикатор в контейнер
+    dots.push(dot); // Сохраняем индикатор в массив
+}
 
-    slides.forEach(item => item.style.display = 'none'); // Скрываем все слайды
-
-    slides[slideIndex - 1].style.display = 'block'; // Показываем текущий слайд
+function moveSlide(offset, slideIndex, slidesField, dots, current) {
+    slidesField.style.transform = `translateX(-${offset}px)`; // Смещаем поле слайдов
 
     if (slides.length < 10) {
-        current.textContent = `0${slideIndex}`; // Если меньше 10, добавляем ведущий 0
+        current.textContent = `0${slideIndex}`; // Обновляем текущий слайд с ведущим нулём
     } else {
-        current.textContent = slideIndex; // В противном случае отображаем число
+        current.textContent = slideIndex; // Обновляем текущий слайд
     }
+
+    dots.forEach(dot => dot.style.opacity = '0.5'); // Устанавливаем неактивное состояние всех точек
+    dots[slideIndex - 1].style.opacity = '1'; // Активируем точку текущего слайда
 }
 
-// Функция для перехода между слайдами
-function plusSlides(n) {
-    showSlides(slideIndex += n); // Изменяем индекс и показываем новый слайд
-}
-
-// Обработчики событий для кнопок "вперед" и "назад"
-prev.addEventListener('click', () => {
-    plusSlides(-1); // Переход на предыдущий слайд
-});
 next.addEventListener('click', () => {
-    plusSlides(1); // Переход на следующий слайд
+    if (offset == (+width.slice(0, width.length - 2) * (slides.length - 1))) { 
+        // Если достигнут последний слайд, возвращаемся к первому
+        offset = 0;
+    } else {
+        offset += +width.slice(0, width.length - 2); // Увеличиваем смещение на ширину одного слайда
+    }
+
+    if (slideIndex == slides.length) {
+        slideIndex = 1; // Переход на первый слайд
+    } else {
+        slideIndex++; // Переход к следующему слайду
+    }
+
+    moveSlide(offset, slideIndex, slidesField, dots, current); // Обновляем слайд
+});
+
+prev.addEventListener('click', () => {
+    if (offset == 0) {
+        offset = +width.slice(0, width.length - 2) * (slides.length - 1); // Переход на последний слайд
+    } else {
+        offset -= +width.slice(0, width.length - 2); // Уменьшаем смещение на ширину одного слайда
+    }
+
+    if (slideIndex == 1) {
+        slideIndex = slides.length; // Переход на последний слайд
+    } else {
+        slideIndex--; // Переход к предыдущему слайду
+    }
+
+    moveSlide(offset, slideIndex, slidesField, dots, current); // Обновляем слайд
+});
+
+dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+        slideIndex = index + 1; // Устанавливаем индекс слайда по индикатору
+        offset = +width.slice(0, width.length - 2) * index; // Смещаем на нужный слайд
+        moveSlide(offset, slideIndex, slidesField, dots, current); // Обновляем слайд
     });
+});
+    
+// Slider 1
+
+    /* let slideIndex = 1;
+
+     showSlides(slideIndex);
+
+     if (slides.length < 10) {
+         total.textContent = `0${slides.length}`;
+     } else {
+         total.textContent = slides.length;
+     }
+
+     function showSlides(n) {
+         if (n > slides.length) {
+             slideIndex = 1;
+         }
+
+         if (n < 1) {
+             slideIndex = slides.length;
+         }
+
+         slides.forEach(item => item.style.display = 'none');
+
+         slides[slideIndex - 1].style.display = 'block';
+
+         if (slides.length < 10) {
+             current.textContent = `0${slideIndex}`;
+         } else {
+             current.textContent = {
+                 slideIndex
+             };
+         }
+     }
+
+     function plusSlides(n) {
+         showSlides(slideIndex += n);
+     }
+
+     prev.addEventListener('click', () => {
+         plusSlides(-1);
+     });
+     next.addEventListener('click', () => {
+         plusSlides(1);
+     }); */
 });
