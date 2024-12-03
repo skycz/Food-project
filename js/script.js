@@ -306,6 +306,7 @@ window.addEventListener('DOMContentLoaded', function () {
         slidesField = document.querySelector('.offer__slider-inner'),
         width = window.getComputedStyle(slidesWrapper).width;
 
+
     if (slides.length < 10) {
         total.textContent = `0${slides.length}`;
         current.textContent = `0${slideIndex}`;
@@ -345,6 +346,10 @@ window.addEventListener('DOMContentLoaded', function () {
         dots.push(dot);
     }
 
+    function deleteNotDigits(str) {
+        return +str.replace(/\D/g, '');
+    }
+
     function moveSlide(offset, slideIndex, slidesField, dots, current) {
         slidesField.style.transform = `translateX(-${offset}px)`;
 
@@ -359,10 +364,10 @@ window.addEventListener('DOMContentLoaded', function () {
     }
 
     next.addEventListener('click', () => {
-        if (offset == (+width.slice(0, width.length - 2) * (slides.length - 1))) {
+        if (offset == deleteNotDigits(width) * (slides.length - 1)) {
             offset = 0;
         } else {
-            offset += +width.slice(0, width.length - 2);
+            offset += deleteNotDigits(width);
         }
 
         if (slideIndex == slides.length) {
@@ -376,9 +381,9 @@ window.addEventListener('DOMContentLoaded', function () {
 
     prev.addEventListener('click', () => {
         if (offset == 0) {
-            offset = +width.slice(0, width.length - 2) * (slides.length - 1);
+            offset = deleteNotDigits(width) * (slides.length - 1);
         } else {
-            offset -= +width.slice(0, width.length - 2);
+            offset -= deleteNotDigits(width);
         }
 
         if (slideIndex == 1) {
@@ -393,7 +398,7 @@ window.addEventListener('DOMContentLoaded', function () {
     dots.forEach((dot, index) => {
         dot.addEventListener('click', () => {
             slideIndex = index + 1;
-            offset = +width.slice(0, width.length - 2) * index;
+            offset = deleteNotDigits(width) * index;
             moveSlide(offset, slideIndex, slidesField, dots, current);
         });
     });
