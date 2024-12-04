@@ -295,108 +295,237 @@ fetch('http://localhost:3000/menu')
 
 // Slider 2
 
-const slides = document.querySelectorAll('.offer__slide'), // Все слайды
-      slider = document.querySelector('.offer__slider'), // Контейнер слайдера
-      prev = document.querySelector('.offer__slider-prev'), // Кнопка "назад"
-      next = document.querySelector('.offer__slider-next'), // Кнопка "вперёд"
-      total = document.querySelector('#total'), // Элемент для отображения общего числа слайдов
-      current = document.querySelector('#current'), // Элемент для отображения текущего слайда
-      slidesWrapper = document.querySelector('.offer__slider-wrapper'), // Обёртка для слайдов
-      slidesField = document.querySelector('.offer__slider-inner'), // Поле, содержащее все слайды
-      width = window.getComputedStyle(slidesWrapper).width; // Ширина обёртки слайдов
+let slideIndex = 1; // Изначальный индекс слайда
+let offset = 0; // Изначальный сдвиг
 
+const slides = document.querySelectorAll('.offer__slide'), // Все слайды
+    slider = document.querySelector('.offer__slider'), // Слайдер контейнер
+    prev = document.querySelector('.offer__slider-prev'), // Кнопка предыдущего слайда
+    next = document.querySelector('.offer__slider-next'), // Кнопка следующего слайда
+    total = document.querySelector('#total'), // Элемент для отображения общего количества слайдов
+    current = document.querySelector('#current'), // Элемент для отображения текущего слайда
+    slidesWrapper = document.querySelector('.offer__slider-wrapper'), // Обертка слайдов
+    slidesField = document.querySelector('.offer__slider-inner'), // Поле для слайдов
+    width = window.getComputedStyle(slidesWrapper).width; // Ширина слайдера
+
+// Устанавливаем общее количество слайдов и текущий слайд
 if (slides.length < 10) {
-    total.textContent = `0${slides.length}`; // Если слайдов меньше 10, добавляем ведущий ноль
-    current.textContent = `0${slideIndex}`; // Устанавливаем текущий слайд с ведущим нулём
+    total.textContent = `0${slides.length}`; // Если слайдов меньше 10, добавляем ведущий 0
+    current.textContent = `0${slideIndex}`; // Устанавливаем текущий слайд с ведущим 0
 } else {
-    total.textContent = slides.length; // Устанавливаем общее число слайдов
-    current.textContent = slideIndex; // Устанавливаем текущий слайд
+    total.textContent = slides.length; // Без ведущего 0
+    current.textContent = slideIndex;
 }
 
-slidesField.style.width = 100 * slides.length + '%'; // Устанавливаем ширину поля для всех слайдов
-slidesField.style.display = 'flex'; // Размещаем слайды в строку
-slidesField.style.transition = '0.5s all'; // Добавляем плавный переход между слайдами
+// Устанавливаем стили для слайдов
+slidesField.style.width = 100 * slides.length + '%'; // Ширина всех слайдов
+slidesField.style.display = 'flex'; // Выводим слайды в строку
+slidesField.style.transition = '0.5s all'; // Плавный переход при переключении слайдов
 
-slidesWrapper.style.overflow = 'hidden'; // Прячем слайды за границами обёртки
+slidesWrapper.style.overflow = 'hidden'; // Прячем слайды, выходящие за пределы обертки
 
+// Устанавливаем ширину каждого слайда
 slides.forEach(slide => {
-    slide.style.width = width; // Устанавливаем одинаковую ширину каждому слайду
+    slide.style.width = width;
 });
 
-slider.style.position = 'relative'; // Устанавливаем позиционирование для слайдера
-
-const indicators = document.createElement('ol'), // Создаём контейнер для индикаторов (точек)
-    dots = []; // Массив для хранения индикаторов
+// Создаем точки индикаторы для слайдов
+const indicators = document.createElement('ol'),
+    dots = [];
 indicators.classList.add('carousel-indicators'); // Добавляем класс для индикаторов
 
-slider.append(indicators); // Вставляем индикаторы в слайдер
+slider.append(indicators); // Добавляем индикаторы в слайдер
 
 for (let i = 0; i < slides.length; i++) {
-    const dot = document.createElement('li'); // Создаём отдельный индикатор
-    dot.classList.add('li-dot'); // Добавляем класс для индикатора
-    dot.setAttribute('data-slide-to', i + 1); // Устанавливаем атрибут для привязки к слайду
+    const dot = document.createElement('li'); // Создаем элемент для точки
+    dot.classList.add('li-dot'); // Добавляем класс для точки
+    dot.setAttribute('data-slide-to', i + 1); // Устанавливаем атрибут для перехода к слайду
 
     if (i == 0) {
-        dot.classList.add('active'); // Активируем первую точку
+        dot.classList.add('active'); // Первая точка активна по умолчанию
     }
 
-    indicators.append(dot); // Добавляем индикатор в контейнер
-    dots.push(dot); // Сохраняем индикатор в массив
+    indicators.append(dot); // Добавляем точку в список индикаторов
+    dots.push(dot); // Добавляем точку в массив
 }
 
+// Функция для удаления всех нецифровых символов из строки
+function deleteNotDigits(str) {
+    return +str.replace(/\D/g, ''); // Заменяем все нецифровые символы на пустое значение
+}
+
+// Функция для перемещения слайдов
 function moveSlide(offset, slideIndex, slidesField, dots, current) {
-    slidesField.style.transform = `translateX(-${offset}px)`; // Смещаем поле слайдов
+    slidesField.style.transform = `translateX(-${offset}px)`; // Перемещаем слайды по оси X
 
-    if (slides.length < 10) {
-        current.textContent = `0${slideIndex}`; // Обновляем текущий слайд с ведущим нулём
-    } else {
-        current.textContent = slideIndex; // Обновляем текущий слайд
+    if (dots) {
+        dots.forEach(dot => dot.style.opacity = '0.5'); // Устанавливаем прозрачность точек
+        dots[slideIndex - 1].style.opacity = '1'; // Устанавливаем полную видимость активной точки
     }
 
-    dots.forEach(dot => dot.style.opacity = '0.5'); // Устанавливаем неактивное состояние всех точек
-    dots[slideIndex - 1].style.opacity = '1'; // Активируем точку текущего слайда
+    if (current) {
+        current.textContent = slides.length < 10 ? `0${slideIndex}` : slideIndex; // Обновляем номер текущего слайда
+    }
 }
 
+// Обработчик для следующего слайда
 next.addEventListener('click', () => {
-    if (offset == (+width.slice(0, width.length - 2) * (slides.length - 1))) { 
-        // Если достигнут последний слайд, возвращаемся к первому
-        offset = 0;
+    if (offset == deleteNotDigits(width) * (slides.length - 1)) {
+        offset = 0; // Если слайд последний, возвращаем на первый
     } else {
-        offset += +width.slice(0, width.length - 2); // Увеличиваем смещение на ширину одного слайда
+        offset += deleteNotDigits(width); // Сдвигаем на один слайд вправо
     }
 
     if (slideIndex == slides.length) {
-        slideIndex = 1; // Переход на первый слайд
+        slideIndex = 1; // Если текущий слайд последний, переключаем на первый
     } else {
-        slideIndex++; // Переход к следующему слайду
+        slideIndex++; // Иначе увеличиваем индекс слайда
     }
 
-    moveSlide(offset, slideIndex, slidesField, dots, current); // Обновляем слайд
+    moveSlide(offset, slideIndex, slidesField, dots, current); // Перемещаем слайды
 });
 
+// Обработчик для предыдущего слайда
 prev.addEventListener('click', () => {
     if (offset == 0) {
-        offset = +width.slice(0, width.length - 2) * (slides.length - 1); // Переход на последний слайд
+        offset = deleteNotDigits(width) * (slides.length - 1); // Если слайд первый, переходим к последнему
     } else {
-        offset -= +width.slice(0, width.length - 2); // Уменьшаем смещение на ширину одного слайда
+        offset -= deleteNotDigits(width); // Иначе сдвигаем на один слайд влево
     }
 
     if (slideIndex == 1) {
-        slideIndex = slides.length; // Переход на последний слайд
+        slideIndex = slides.length; // Если текущий слайд первый, переключаем на последний
     } else {
-        slideIndex--; // Переход к предыдущему слайду
+        slideIndex--; // Иначе уменьшаем индекс слайда
     }
 
-    moveSlide(offset, slideIndex, slidesField, dots, current); // Обновляем слайд
+    moveSlide(offset, slideIndex, slidesField, dots, current); // Перемещаем слайды
 });
 
+// Обработчик кликов по точкам индикатора
 dots.forEach((dot, index) => {
     dot.addEventListener('click', () => {
-        slideIndex = index + 1; // Устанавливаем индекс слайда по индикатору
-        offset = +width.slice(0, width.length - 2) * index; // Смещаем на нужный слайд
-        moveSlide(offset, slideIndex, slidesField, dots, current); // Обновляем слайд
+        slideIndex = index + 1; // Устанавливаем новый индекс слайда
+        offset = deleteNotDigits(width) * index; // Обновляем сдвиг
+        moveSlide(offset, slideIndex, slidesField, dots, current); // Перемещаем слайды
     });
 });
+
+// Calc
+
+const result = document.querySelector('.calculating__result span'); // Элемент для отображения результата
+
+let sex, height, weight, age, ratio; // Переменные для хранения данных
+
+// Получаем данные из localStorage или устанавливаем значения по умолчанию
+if (localStorage.getItem('sex')) {
+    sex = localStorage.getItem('sex');
+} else {
+    sex = 'female'; // Если значения нет, по умолчанию 'female'
+    localStorage.setItem('sex', 'female'); // Сохраняем в localStorage
+}
+
+if (localStorage.getItem('ratio')) {
+    ratio = localStorage.getItem('ratio');
+} else {
+    ratio = '1.375'; // Если значения нет, по умолчанию '1.375'
+    localStorage.setItem('ratio', 1.375); // Сохраняем в localStorage
+}
+
+// Функция для инициализации значений из localStorage
+function initLocalSettings(selector, activeClass) {
+    const elements = document.querySelectorAll(selector);
+
+    elements.forEach(elem => {
+        elem.classList.remove(activeClass); // Убираем активный класс у всех элементов
+        if (elem.getAttribute('id') === localStorage.getItem('sex')) {
+            elem.classList.add(activeClass); // Добавляем активный класс для выбранного пола
+        }
+        if (elem.getAttribute('data-ratio') === localStorage.getItem('ratio')) {
+            elem.classList.add(activeClass); // Добавляем активный класс для выбранного коэффициента
+        }
+    });
+}
+
+initLocalSettings('#gender div', 'calculating__choose-item_active');
+initLocalSettings('.calculating__choose_big div', 'calculating__choose-item_active');
+
+// Функция для расчета итогового значения
+function calcTotal() {
+    if (!sex || !height || !weight || !age || !ratio) {
+        result.textContent = '____'; // Если не все данные введены, выводим '____'
+        return;
+    }
+
+    // Формулы расчета в зависимости от пола
+    if (sex === 'female') {
+        result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
+    } else {
+        result.textContent = Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio);
+    }
+}
+
+calcTotal(); // Вызов функции при старте
+
+// Функция для обработки статичной информации (пол и коэффициент активности)
+function getStaticInformation(selector, activeClass) {
+    const elements = document.querySelectorAll(selector);
+
+    elements.forEach(elem => {
+        elem.addEventListener('click', (e) => {
+            if (e.target.getAttribute('data-ratio')) {
+                ratio = +e.target.getAttribute('data-ratio');
+                localStorage.setItem('ratio', +e.target.getAttribute('data-ratio'));
+            } else {
+                sex = e.target.getAttribute('id');
+                localStorage.setItem('sex', e.target.getAttribute('id'));
+            }
+
+            elements.forEach(elem => {
+                elem.classList.remove(activeClass);
+            });
+
+            e.target.classList.add(activeClass); // Добавляем активный класс к выбранному элементу
+
+            calcTotal(); // Пересчитываем результат
+        });
+    });
+}
+
+getStaticInformation('#gender div', 'calculating__choose-item_active');
+getStaticInformation('.calculating__choose_big div', 'calculating__choose-item_active');
+
+// Функция для обработки динамичной информации (рост, вес, возраст)
+function getDynamicInformation(selector) {
+    const input = document.querySelector(selector);
+
+    input.addEventListener('input', () => {
+        if (input.value.match(/\D/g)) {
+            input.style.border = '1px solid red'; // Если введены нецифровые значения, меняем границу
+        } else {
+            input.style.border = 'none'; // Если данные корректные, восстанавливаем стандартную границу
+        }
+
+        switch (input.getAttribute('id')) {
+            case 'height':
+                height = +input.value;
+                break;
+            case 'weight':
+                weight = +input.value;
+                break;
+            case 'age':
+                age = +input.value;
+                break;
+        }
+
+        calcTotal(); // Пересчитываем результат
+    });
+}
+
+getDynamicInformation('#height');
+getDynamicInformation('#weight');
+getDynamicInformation('#age');
+
     
 // Slider 1
 
