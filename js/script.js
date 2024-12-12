@@ -1,6 +1,5 @@
-window.addEventListener('DOMContentLoaded', function () {
-    // Добавляем обработчик события, который срабатывает, когда весь контент страницы загружен (DOMContentLoaded)
-window.addEventListener('DOMContentLoaded', function () {
+// Добавляем обработчик события, который срабатывает, когда весь контент страницы загружен (DOMContentLoaded)
+window.addEventListener('DOMContentLoaded', function() {
 
     // Импортируем различные модули, каждый из которых решает свою задачу в приложении
     const tabs = require('./modules/tabs'), // Модуль для вкладок
