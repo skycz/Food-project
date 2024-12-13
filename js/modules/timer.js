@@ -1,70 +1,81 @@
-function timer() {
-    // Таймер для отсчета до определенной даты
-    const deadline = '2024-12-23'; // Конечная дата для таймера
+function timer(id, deadline) {
+    // Timer - Функция для реализации таймера, отсчитывающего время до заданной даты
 
     // Функция для получения оставшегося времени
     function getTimeRemaining(endtime) {
-        // Вычисляем разницу между конечной датой и текущим временем
+        // Разница между конечной датой и текущей датой в миллисекундах
         const t = Date.parse(endtime) - Date.parse(new Date()),
+
             // Вычисляем количество оставшихся дней
             days = Math.floor((t / (1000 * 60 * 60 * 24))),
+
             // Вычисляем оставшиеся секунды
             seconds = Math.floor((t / 1000) % 60),
+
             // Вычисляем оставшиеся минуты
             minutes = Math.floor((t / 1000 / 60) % 60),
+
             // Вычисляем оставшиеся часы
             hours = Math.floor((t / (1000 * 60 * 60) % 24));
 
+        // Возвращаем объект с оставшимися днями, часами, минутами, секундами и общей оставшейся суммой времени
         return {
-            'total': t,  // Общая разница во времени
-            'days': days, // Оставшиеся дни
-            'hours': hours, // Оставшиеся часы
-            'minutes': minutes, // Оставшиеся минуты
-            'seconds': seconds // Оставшиеся секунды
+            'total': t,
+            'days': days,
+            'hours': hours,
+            'minutes': minutes,
+            'seconds': seconds
         };
     }
 
-    // Функция для добавления нуля перед числами меньше 10 (например, 5 -> 05)
+    // Функция для добавления нуля к числу, если оно меньше 10
     function getZero(num) {
+        // Если число от 0 до 9, добавляем перед числом "0"
         if (num >= 0 && num < 10) {
-            return '0' + num; // Добавляем ноль, если число от 0 до 9
+            return '0' + num;
         } else {
-            return num; // Возвращаем число, если оно больше 9
+            return num;
         }
     }
 
-    // Основная функция для установки таймера на странице
+    // Функция для установки таймера на странице
     function setClock(selector, endtime) {
-        const timer = document.querySelector(selector), // Элемент, куда будет выводиться таймер
-            days = timer.querySelector("#days"), // Элемент для отображения оставшихся дней
-            hours = timer.querySelector('#hours'), // Элемент для отображения оставшихся часов
-            minutes = timer.querySelector('#minutes'), // Элемент для отображения оставшихся минут
-            seconds = timer.querySelector('#seconds'), // Элемент для отображения оставшихся секунд
-            // Устанавливаем интервал обновления таймера каждую секунду
+
+        // Находим контейнер таймера по переданному селектору
+        const timer = document.querySelector(selector),
+
+            // Находим элементы, в которых будет отображаться количество дней, часов, минут и секунд
+            days = timer.querySelector("#days"),
+            hours = timer.querySelector('#hours'),
+            minutes = timer.querySelector('#minutes'),
+            seconds = timer.querySelector('#seconds'),
+
+            // Запускаем обновление таймера каждую секунду
             timeInterval = setInterval(updateClock, 1000);
 
-        updateClock(); // Сразу запускаем обновление таймера при первой загрузке страницы
+        // Обновляем таймер сразу при запуске
+        updateClock();
 
-        // Функция для обновления значений таймера
+        // Функция для обновления значений времени в реальном времени
         function updateClock() {
-            const t = getTimeRemaining(endtime); // Получаем оставшееся время
+            // Получаем оставшееся время
+            const t = getTimeRemaining(endtime);
 
-            // Обновляем содержимое элементов с днями, часами, минутами и секундами
+            // Обновляем содержимое каждого элемента с временем
             days.innerHTML = getZero(t.days);
             hours.innerHTML = getZero(t.hours);
             minutes.innerHTML = getZero(t.minutes);
             seconds.innerHTML = getZero(t.seconds);
 
-            // Если время вышло (общее время <= 0), останавливаем таймер
+            // Если оставшееся время меньше или равно нулю, останавливаем таймер
             if (t.total <= 0) {
                 clearInterval(timeInterval);
             }
         }
     }
 
-    // Запускаем таймер с указанным селектором и конечной датой
-    setClock('.timer', deadline);
+    // Устанавливаем таймер с указанным ID на странице и заданной датой
+    setClock(id, deadline);
 }
 
-// Экспортируем функцию, чтобы использовать её в других частях программы
-module.exports = timer;
+export default timer; // Экспортируем функцию таймера для использования в других частях приложения
