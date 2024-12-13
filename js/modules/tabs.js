@@ -1,53 +1,57 @@
-function tabs() {
-    // Инициализация переменных, содержащих элементы для вкладок
-    let tabs = document.querySelectorAll('.tabheader__item'), // Все элементы вкладок
-        tabsContent = document.querySelectorAll('.tabcontent'), // Все элементы содержимого вкладок
-        tabsParent = document.querySelector('.tabheader__items'); // Родительский элемент для вкладок
+function tabs(tabsSelector, tabsContentSelector, tabsParentSelector, activeClass) {
+    // Tabs - Функция для реализации вкладок (табов)
 
-    // Функция скрытия содержимого всех вкладок
+    // Получаем все вкладки, контент вкладок и родительский элемент вкладок из DOM
+    let tabs = document.querySelectorAll(tabsSelector),
+        tabsContent = document.querySelectorAll(tabsContentSelector),
+        tabsParent = document.querySelector(tabsParentSelector);
+
+    // Функция для скрытия контента всех вкладок
     function hideTabContent() {
+
+        // Скрываем все элементы контента вкладок, добавляем класс 'hide' и убираем 'show', 'fade'
         tabsContent.forEach(item => {
-            // Добавляем класс 'hide', чтобы скрыть вкладку
             item.classList.add('hide');
-            // Удаляем классы 'show' и 'fade', чтобы скрыть анимацию
             item.classList.remove('show', 'fade');
         });
 
-        // Удаляем активный класс для всех вкладок
+        // Убираем активный класс с всех вкладок
         tabs.forEach(item => {
-            item.classList.remove('tabheader__item_active');
+            item.classList.remove(activeClass);
         });
     }
 
-    // Функция для отображения содержимого вкладки
+    // Функция для отображения контента вкладки по индексу (по умолчанию 0)
     function showTabContent(i = 0) {
-        // Добавляем классы 'show' и 'fade' для анимации и видимости выбранной вкладки
+        // Показываем контент вкладки, добавляем классы 'show' и 'fade', удаляем 'hide'
         tabsContent[i].classList.add('show', 'fade');
-        // Убираем класс 'hide', чтобы отображение стало видимым
         tabsContent[i].classList.remove('hide');
-        // Добавляем активный класс для соответствующей вкладки
-        tabs[i].classList.add('tabheader__item_active');
+        
+        // Добавляем активный класс на выбранную вкладку
+        tabs[i].classList.add(activeClass);
     }
 
-    // Изначально скрываем все вкладки и показываем первую вкладку
+    // Сначала скрываем все вкладки и показываем первую вкладку
     hideTabContent();
     showTabContent();
 
-    // Обработчик событий для родительского элемента вкладок
-    tabsParent.addEventListener('click', function (event) {
-        const target = event.target; // Получаем элемент, по которому кликнули
-        // Проверяем, был ли клик по элементу, который является вкладкой
-        if (target && target.classList.contains('tabheader__item')) {
+    // Добавляем обработчик событий на родительский элемент вкладок
+    tabsParent.addEventListener('click', function(event) {
+        // Определяем, по какой вкладке был клик
+        const target = event.target;
+        
+        // Проверяем, является ли кликнутая цель одной из вкладок
+        if (target && target.classList.contains(tabsSelector.slice(1))) {
+            // Если да, то для каждой вкладки сравниваем кликнутую вкладку с текущей
             tabs.forEach((item, i) => {
-                // Если кликнули на вкладку, показываем соответствующее содержимое
                 if (target == item) {
-                    hideTabContent(); // Скрываем все содержимое вкладок
-                    showTabContent(i); // Показываем содержимое выбранной вкладки
+                    // Скрываем все вкладки и показываем выбранную
+                    hideTabContent();
+                    showTabContent(i);
                 }
             });
         }
     });
 }
 
-// Экспортируем функцию для использования в других частях программы
-module.exports = tabs;
+export default tabs; // Экспортируем функцию для использования в других частях приложения
