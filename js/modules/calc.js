@@ -1,35 +1,36 @@
-// Основная функция для расчета калорий
 function calc() {
-    // Получаем элемент, где будет отображаться результат
+    // Калькулятор для подсчёта калорийности или другой информации на основе параметров пользователя
+
+    // Результат выводится в контейнер с этим селектором
     const result = document.querySelector('.calculating__result span');
 
-    // Объявляем переменные для пола, роста, веса, возраста и коэффициента активности
+    // Переменные для хранения пользовательских данных
     let sex, height, weight, age, ratio;
 
-    // Проверяем, есть ли данные о поле в localStorage, если нет — устанавливаем дефолтное значение
+    // Проверка наличия данных о поле в LocalStorage
     if (localStorage.getItem('sex')) {
-        sex = localStorage.getItem('sex');
+        sex = localStorage.getItem('sex'); // Если есть, используем значение из LocalStorage
     } else {
-        sex = 'female'; // по умолчанию женский пол
-        localStorage.setItem('sex', 'female'); // сохраняем в localStorage
+        sex = 'female'; // По умолчанию женский пол
+        localStorage.setItem('sex', 'female'); // Сохраняем в LocalStorage
     }
 
-    // Проверяем, есть ли данные о коэффициенте активности в localStorage, если нет — устанавливаем дефолтное значение
+    // Проверка наличия коэффициента активности в LocalStorage
     if (localStorage.getItem('ratio')) {
-        ratio = localStorage.getItem('ratio');
+        ratio = localStorage.getItem('ratio'); // Если есть, используем значение из LocalStorage
     } else {
-        ratio = '1.375'; // коэффициент для умеренной активности
-        localStorage.setItem('ratio', 1.375); // сохраняем в localStorage
+        ratio = '1.375'; // По умолчанию коэффициент низкой активности
+        localStorage.setItem('ratio', 1.375); // Сохраняем в LocalStorage
     }
 
-    // Функция для инициализации настроек из localStorage
+    // Функция инициализации локальных настроек на основе данных из LocalStorage
     function initLocalSettings(selector, activeClass) {
-        const elements = document.querySelectorAll(selector); // находим все элементы по селектору
+        const elements = document.querySelectorAll(selector);
 
         elements.forEach(elem => {
-            elem.classList.remove(activeClass); // удаляем активный класс у всех элементов
+            elem.classList.remove(activeClass); // Убираем активный класс у всех элементов
 
-            // Если элемент соответствует значению в localStorage, добавляем активный класс
+            // Добавляем активный класс элементу, который совпадает с сохранённым значением
             if (elem.getAttribute('id') === localStorage.getItem('sex')) {
                 elem.classList.add(activeClass);
             }
@@ -39,97 +40,96 @@ function calc() {
         });
     }
 
-    // Инициализируем настройки для пола и коэффициента активности
+    // Инициализация активных настроек для пола и коэффициента активности
     initLocalSettings('#gender div', 'calculating__choose-item_active');
     initLocalSettings('.calculating__choose_big div', 'calculating__choose-item_active');
 
-    // Функция для расчета итогового значения
+    // Основная функция расчёта результата
     function calcTotal() {
-        // Проверяем, что все данные введены
+        // Если какие-либо данные отсутствуют, выводим пустое значение
         if (!sex || !height || !weight || !age || !ratio) {
-            result.textContent = '____'; // Если не хватает данных, показываем "____"
+            result.textContent = '____';
             return;
         }
 
-        // Формула для расчета калорий в зависимости от пола
+        // Расчёт калорийности в зависимости от пола
         if (sex === 'female') {
+            // Формула для женщин
             result.textContent = Math.round((447.6 + (9.2 * weight) + (3.1 * height) - (4.3 * age)) * ratio);
         } else {
+            // Формула для мужчин
             result.textContent = Math.round((88.36 + (13.4 * weight) + (4.8 * height) - (5.7 * age)) * ratio);
         }
     }
 
-    // Выполняем расчет сразу при загрузке
+    // Вызов расчёта при загрузке страницы
     calcTotal();
 
-    // Функция для получения статической информации (пол и коэффициент активности)
+    // Функция для обработки кликов по статическим элементам (пол и коэффициент активности)
     function getStaticInformation(selector, activeClass) {
-        const elements = document.querySelectorAll(selector); // находим все элементы по селектору
+        const elements = document.querySelectorAll(selector);
 
         elements.forEach(elem => {
-            elem.addEventListener('click', (e) => { // добавляем обработчик события при клике
-                if (e.target.getAttribute('data-ratio')) { // если был клик по коэффициенту
-                    ratio = +e.target.getAttribute('data-ratio'); // сохраняем коэффициент
-                    localStorage.setItem('ratio', +e.target.getAttribute('data-ratio')); // сохраняем в localStorage
-                } else { // если был клик по полу
-                    sex = e.target.getAttribute('id'); // сохраняем пол
-                    localStorage.setItem('sex', e.target.getAttribute('id')); // сохраняем в localStorage
+            elem.addEventListener('click', (e) => {
+                // Проверяем, кликают ли на элемент с атрибутом data-ratio
+                if (e.target.getAttribute('data-ratio')) {
+                    ratio = +e.target.getAttribute('data-ratio'); // Сохраняем коэффициент
+                    localStorage.setItem('ratio', +e.target.getAttribute('data-ratio')); // Записываем в LocalStorage
+                } else {
+                    sex = e.target.getAttribute('id'); // Сохраняем пол
+                    localStorage.setItem('sex', e.target.getAttribute('id')); // Записываем в LocalStorage
                 }
 
-                // Убираем активный класс у всех элементов
+                // Обновляем классы активности
                 elements.forEach(elem => {
                     elem.classList.remove(activeClass);
                 });
 
-                // Добавляем активный класс для выбранного элемента
                 e.target.classList.add(activeClass);
 
-                // Перерасчитываем итоговое значение
-                calcTotal();
+                calcTotal(); // Пересчитываем результат
             });
         });
     }
 
-    // Инициализируем обработчики для выбора пола и коэффициента активности
+    // Установка обработчиков для элементов пола и коэффициента активности
     getStaticInformation('#gender div', 'calculating__choose-item_active');
     getStaticInformation('.calculating__choose_big div', 'calculating__choose-item_active');
 
-    // Функция для получения динамической информации (ввод данных пользователем)
+    // Функция для обработки ввода динамических данных (рост, вес, возраст)
     function getDynamicInformation(selector) {
-        const input = document.querySelector(selector); // находим input по селектору
+        const input = document.querySelector(selector);
 
-        input.addEventListener('input', () => { // добавляем обработчик события при вводе данных
-
-            // Если введено не число, делаем рамку красной
+        input.addEventListener('input', () => {
+            // Проверяем, содержит ли ввод нечисловые символы
             if (input.value.match(/\D/g)) {
-                input.style.border = '1px solid red';
+                input.style.border = '1px solid red'; // Если да, делаем красную рамку
             } else {
-                input.style.border = 'none'; // если введено число, убираем красную рамку
+                input.style.border = 'none'; // Если нет, убираем рамку
             }
 
-            // Сохраняем значения для роста, веса и возраста
+            // Сохраняем введённые данные в соответствующие переменные
             switch (input.getAttribute('id')) {
                 case 'height':
-                    height = +input.value; // сохраняем рост
+                    height = +input.value;
                     break;
                 case 'weight':
-                    weight = +input.value; // сохраняем вес
+                    weight = +input.value;
                     break;
                 case 'age':
-                    age = +input.value; // сохраняем возраст
+                    age = +input.value;
                     break;
             }
 
-            // Перерасчитываем итоговое значение
-            calcTotal();
+            calcTotal(); // Пересчитываем результат
         });
     }
 
-    // Инициализируем обработчики для ввода роста, веса и возраста
+    // Установка обработчиков для ввода данных
     getDynamicInformation('#height');
     getDynamicInformation('#weight');
     getDynamicInformation('#age');
 }
 
 // Экспортируем функцию для использования в других модулях
-module.exports = calc;
+export default calc;
