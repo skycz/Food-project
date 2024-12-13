@@ -1,129 +1,90 @@
-function forms() {
-    // Сбор всех форм на странице
-    const forms = document.querySelectorAll('form');
+import {closeModal, openModal} from "./modal"; // Импортируем функции для управления модальным окном
+import {postData} from "../services/services"; // Импортируем функцию для отправки данных на сервер
 
-    // Сообщения для различных состояний формы (loading, success, failure)
+function forms(formSelector, modalTimerId) {
+    // Forms (Обработка форм)
+
+    // Находим все формы на странице, соответствующие переданному селектору
+    const forms = document.querySelectorAll(formSelector);
+
+    // Объект с сообщениями для различных состояний отправки формы
     const message = {
-        loading: 'img/form/spinner.svg',  // Путь к изображению для загрузки
-        success: 'Спасибо! Скоро мы с вами свяжемся',  // Сообщение об успешной отправке
-        failure: 'Что-то пошло не так...'  // Сообщение о неудачной отправке
+        loading: 'img/form/spinner.svg', // Индикатор загрузки
+        success: 'Спасибо! Скоро мы с вами свяжемся', // Успешная отправка
+        failure: 'Что-то пошло не так...' // Ошибка отправки
     };
 
-    // Применение обработчика к каждой форме на странице
+    // Для каждой формы привязываем обработчик отправки данных
     forms.forEach(item => {
         bindPostData(item);
     });
 
-    // Функция для отправки данных методом POST с использованием async/await
-    const postData = async (url, data) => {
-        // Отправка данных на сервер с использованием fetch
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-type': 'application/json'  // Устанавливаем тип контента как JSON
-            },
-            body: data  // Данные, которые мы отправляем
-        });
-
-        // Получаем ответ в формате JSON
-        return await res.json();
-    };
-
-    // Функция для получения данных методом GET с использованием async/await
-    const getResource = async (url) => {
-        // Запрос данных с сервера
-        const res = await fetch(url);
-
-        // Проверка на успешность запроса
-        if (!res.ok) {
-            throw new Error(`Could not fetch ${url}, status: ${res.status}`);
-        }
-
-        // Возвращаем полученные данные в формате JSON
-        return await res.json();
-    };
-
-    // Пример использования функции getResource для получения данных меню
-    /* getResource('http://localhost:3000/menu')
-        .then(data => {
-            data.forEach(({ img, altimg, title, descr, price }) => {
-                new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
-            });
-        }); */
-
-    // Функция для привязки обработчика отправки данных формы
+    // Функция привязки обработчика отправки данных к форме
     function bindPostData(form) {
-        // Обработчик на событие submit для каждой формы
         form.addEventListener('submit', (e) => {
-            e.preventDefault();  // Отменяем стандартное поведение формы
+            e.preventDefault(); // Отменяем стандартное поведение формы (перезагрузку страницы)
 
-            // Создаем элемент для отображения сообщения о загрузке
+            // Добавляем сообщение о статусе (спиннер загрузки)
             let statusMessage = document.createElement('img');
-            statusMessage.src = message.loading;  // Источник изображения
+            statusMessage.src = message.loading; // Указываем путь к изображению
             statusMessage.style.cssText = `
                 display: block;
                 margin: 0 auto;
             `;
-            // Вставляем это сообщение после формы
-            form.insertAdjacentElement('afterend', statusMessage);
+            form.insertAdjacentElement('afterend', statusMessage); // Размещаем сообщение под формой
 
-            // Получаем данные из формы
-            const formData = new FormData(form);
+            // Сбор данных из формы
+            const formData = new FormData(form); // Создаём объект FormData
+            const json = JSON.stringify(Object.fromEntries(formData.entries())); // Преобразуем данные в JSON
 
-            // Преобразуем данные формы в JSON
-            const json = JSON.stringify(Object.fromEntries(formData.entries()));
-
-            // Отправляем данные на сервер
+            // Отправляем данные на сервер с использованием функции `postData`
             postData('http://localhost:3000/requests', json)
                 .then(data => {
-                    console.log(data);  // Логируем ответ от сервера
-                    // Показать модальное окно с успехом
-                    showThanksModal(message.success);
-                    statusMessage.remove();  // Убираем сообщение о загрузке
+                    console.log(data); // Логируем данные, возвращённые сервером
+                    showThanksModal(message.success); // Показываем сообщение об успешной отправке
+                    statusMessage.remove(); // Удаляем спиннер
                 }).catch(() => {
-                    // Показать модальное окно с ошибкой
-                    showThanksModal(message.failure);
+                    showThanksModal(message.failure); // Показываем сообщение об ошибке
                 }).finally(() => {
-                    form.reset();  // Очищаем форму после отправки
+                    form.reset(); // Очищаем форму в любом случае
                 });
         });
     }
 
-    // Функция для отображения модального окна с сообщением об успехе или ошибке
+    // Функция для отображения модального окна с благодарностью или ошибкой
     function showThanksModal(message) {
-        // Находим предыдущий модальный диалог
-        const prevModalDialog = document.querySelector('.modal__dialog');
+        const prevModalDialog = document.querySelector('.modal__dialog'); // Находим текущий диалог модального окна
 
-        // Скрываем старый диалог
-        prevModalDialog.classList.add('hide');
-        openModal();  // Открываем модальное окно
+        prevModalDialog.classList.add('hide'); // Скрываем текущий диалог
+        openModal('.modal', modalTimerId); // Открываем модальное окно
 
-        // Создаем новый модальный диалог с сообщением
+        // Создаём новый диалог с сообщением
         const thanksModal = document.createElement('div');
         thanksModal.classList.add('modal__dialog');
         thanksModal.innerHTML = `
             <div class="modal__content">
-                <div class="modal__close" data-close>×</div>
-                <div class="modal__title">${message}</div>
+                <div class="modal__close" data-close>×</div> <!-- Кнопка закрытия -->
+                <div class="modal__title">${message}</div> <!-- Сообщение -->
             </div>
         `;
-        // Вставляем новый модальный диалог в модальное окно
+
+        // Добавляем новый диалог в модальное окно
         document.querySelector('.modal').append(thanksModal);
 
-        // Убираем новое окно спустя 4 секунды и восстанавливаем старое окно
+        // Через 4 секунды удаляем диалог благодарности и возвращаем прежний диалог
         setTimeout(() => {
-            thanksModal.remove();  // Удаляем новое модальное окно
-            prevModalDialog.classList.add('show');  // Восстанавливаем старое окно
-            prevModalDialog.classList.remove('hide');
-            closeModal();  // Закрываем модальное окно
+            thanksModal.remove(); // Удаляем сообщение
+            prevModalDialog.classList.add('show'); // Показываем предыдущий диалог
+            prevModalDialog.classList.remove('hide'); // Убираем класс `hide`
+            closeModal('.modal'); // Закрываем модальное окно
         }, 4000);
     }
 
-    // Получаем данные с сервера (пример использования fetch)
+    // Пример получения данных с сервера для проверки
     fetch('http://localhost:3000/menu')
-        .then(data => data.json())
-        .then(res => console.log(res));  // Логируем полученные данные
+        .then(data => data.json()) // Преобразуем данные в JSON
+        .then(res => console.log(res)); // Логируем данные для проверки
 }
 
 // Экспортируем функцию для использования в других модулях
-module.exports = forms;
+export default forms;
