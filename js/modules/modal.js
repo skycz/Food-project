@@ -1,62 +1,61 @@
-function modal() {
-    // Модальные окна
-
-    // Получаем все элементы с атрибутом data-modal (кнопки для открытия модального окна)
-    const modalTrigger = document.querySelectorAll('[data-modal]'),
-        // Находим само модальное окно
-        modal = document.querySelector('.modal');
-
-    // Добавляем обработчик событий для каждой кнопки, которая открывает модальное окно
-    modalTrigger.forEach(btn => {
-        btn.addEventListener('click', openModal);
-    });
-
+function closeModal(modalSelector) {
     // Функция для закрытия модального окна
-    function closeModal() {
-        modal.classList.add('hide');  // Добавляем класс hide, который скрывает модальное окно
-        modal.classList.remove('show');  // Убираем класс show, который делает окно видимым
-        document.body.style.overflow = '';  // Восстанавливаем прокрутку страницы
-    }
+    const modal = document.querySelector(modalSelector); // Находим модальное окно по селектору
 
-    // Функция для открытия модального окна
-    function openModal() {
-        modal.classList.add('show');  // Добавляем класс show, который отображает окно
-        modal.classList.remove('hide');  // Убираем класс hide
-        document.body.style.overflow = 'hidden';  // Блокируем прокрутку страницы при открытом модальном окне
-        clearInterval(modalTimerId);  // Если окно открылось вручную, отменяем автоматическое открытие через заданное время
-    }
-
-    // Обработчик событий для закрытия модального окна при клике на область за пределами окна или на кнопку закрытия
-    modal.addEventListener('click', (e) => {
-        // Если клик был по самому модальному окну или по кнопке закрытия (data-close), закрываем окно
-        if (e.target === modal || e.target.getAttribute('data-close') == "") {
-            closeModal();
-        }
-    });
-
-    // Обработчик события нажатия клавиши, чтобы закрыть окно при нажатии Escape
-    document.addEventListener('keydown', (e) => {
-        // Если нажата клавиша Escape и модальное окно открыто, закрываем его
-        if (e.code === "Escape" && modal.classList.contains('show')) {
-            closeModal();
-        }
-    });
-
-    // Таймер для автоматического открытия модального окна через 50 секунд
-    const modalTimerId = setTimeout(openModal, 50000);
-    // Изменил значение времени, чтобы оно не отвлекало пользователя
-
-    // Функция для открытия модального окна при прокрутке страницы до конца
-    function showModalByScroll() {
-        // Проверяем, если пользователь прокрутил страницу до конца (документ полностью виден)
-        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
-            openModal();  // Открываем модальное окно
-            window.removeEventListener('scroll', showModalByScroll);  // Убираем обработчик события, чтобы окно открылось только один раз
-        }
-    }
-    // Добавляем обработчик события scroll, чтобы открыть окно при прокрутке до конца страницы
-    window.addEventListener('scroll', showModalByScroll);
+    modal.classList.add('hide'); // Добавляем класс `hide` для скрытия окна
+    modal.classList.remove('show'); // Удаляем класс `show`, если он есть
+    document.body.style.overflow = ''; // Возвращаем прокрутку страницы
 }
 
-// Экспортируем функцию для использования в других модулях
-module.exports = modal;
+function openModal(modalSelector, modalTimerId) {
+    // Функция для открытия модального окна
+    const modal = document.querySelector(modalSelector); // Находим модальное окно по селектору
+
+    modal.classList.add('show'); // Добавляем класс `show` для отображения окна
+    modal.classList.remove('hide'); // Удаляем класс `hide`, если он есть
+    document.body.style.overflow = 'hidden'; // Блокируем прокрутку страницы
+
+    console.log(modalTimerId); // Логируем ID таймера (для отладки)
+    if (modalTimerId) {
+        clearInterval(modalTimerId); // Останавливаем таймер, если он активен
+    }
+}
+
+function modal(triggerSelector, modalSelector, modalTimerId) {
+    // Основная функция для управления модальным окном
+
+    const modalTrigger = document.querySelectorAll(triggerSelector), // Находим все элементы, которые открывают модальное окно
+        modal = document.querySelector(modalSelector); // Находим само модальное окно
+
+    modalTrigger.forEach(btn => {
+        // Для каждой кнопки открытия модального окна добавляем обработчик события
+        btn.addEventListener('click', () => openModal(modalSelector, modalTimerId));
+    });
+
+    modal.addEventListener('click', (e) => {
+        // Закрываем модальное окно при клике на область вне окна или на кнопку с атрибутом `data-close`
+        if (e.target === modal || e.target.getAttribute('data-close') == "") {
+            closeModal(modalSelector);
+        }
+    });
+
+    document.addEventListener('keydown', (e) => {
+        // Закрываем модальное окно при нажатии клавиши "Escape", если окно открыто
+        if (e.code === "Escape" && modal.classList.contains('show')) {
+            closeModal(modalSelector);
+        }
+    });
+
+    // Функция для автоматического показа модального окна при прокрутке страницы до конца
+    function showModalByScroll() {
+        if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) {
+            openModal(modalSelector, modalTimerId); // Открываем модальное окно
+            window.removeEventListener('scroll', showModalByScroll); // Удаляем обработчик, чтобы окно больше не открывалось
+        }
+    }
+
+    window.addEventListener('scroll', showModalByScroll); // Добавляем обработчик события на прокрутку
+}
+
+export default modal; // Экспортируем основную функцию `modal` по умолчанию
+export {closeModal, openModal}; // Экспортируем функции
