@@ -1,69 +1,74 @@
-// Основная функция для создания карточек меню
+import {getResource} from "../services/services";
+
 function cards() {
-    // Класс для создания карточек меню
+    // Используем классы для создания карточек меню
+
+    // Определение класса MenuCard для представления карточек
     class MenuCard {
         constructor(src, alt, title, descr, price, parentSelector, ...classes) {
-            // Инициализация свойств объекта
             this.src = src; // Путь к изображению
-            this.alt = alt; // Атрибут alt для изображения
+            this.alt = alt; // Альтернативный текст для изображения
             this.title = title; // Заголовок карточки
             this.descr = descr; // Описание карточки
-            this.price = price; // Цена
-            this.classes = classes; // Дополнительные классы для элемента
-            this.parent = document.querySelector(parentSelector); // Родительский элемент для добавления карточки
-            this.transfer = 27; // Константа для перевода цены в другую валюту (например, UAH)
-            this.changeToUAH(); // Переводим цену в гривны
+            this.price = price; // Цена карточки
+            this.classes = classes; // Дополнительные CSS-классы
+            this.parent = document.querySelector(parentSelector); // Родительский контейнер
+            this.transfer = 27; // Курс валюты (доллары в гривны)
+            this.changeToUAH(); // Конвертация цены в гривны
         }
 
-        // Метод для перевода цены в гривны
+        // Метод для конвертации цены в гривны
         changeToUAH() {
-            this.price = this.price * this.transfer; // Умножаем цену на коэффициент
+            this.price = this.price * this.transfer;
         }
 
-        // Метод для рендеринга карточки и добавления её на страницу
+        // Метод для отрисовки карточки в DOM
         render() {
-            const element = document.createElement('div'); // Создаем новый div для карточки
+            // Создаём новый элемент `div`
+            const element = document.createElement('div');
 
-            // Если классов не передано, устанавливаем дефолтное значение
+            // Если дополнительные классы не указаны, устанавливаем класс по умолчанию
             if (this.classes.length === 0) {
-                this.classes = "menu__item"; // По умолчанию добавляем класс 'menu__item'
-                element.classList.add(this.classes); // Добавляем класс
+                this.classes = "menu__item"; // Класс по умолчанию
+                element.classList.add(this.classes);
             } else {
-                // Если классы переданы, добавляем их ко всем
+                // Если указаны, добавляем их к элементу
                 this.classes.forEach(className => element.classList.add(className));
             }
 
-            // Вставляем разметку в элемент
+            // Добавляем HTML-разметку для карточки
             element.innerHTML = `
-                <img src=${this.src} alt=${this.alt}> <!-- Добавляем изображение -->
-                <h3 class="menu__item-subtitle">${this.title}</h3> <!-- Заголовок -->
-                <div class="menu__item-descr">${this.descr}</div> <!-- Описание -->
-                <div class="menu__item-divider"></div> <!-- Разделитель -->
+                <img src=${this.src} alt=${this.alt}>
+                <h3 class="menu__item-subtitle">${this.title}</h3>
+                <div class="menu__item-descr">${this.descr}</div>
+                <div class="menu__item-divider"></div>
                 <div class="menu__item-price">
-                    <div class="menu__item-cost">Цена:</div> <!-- Метка для цены -->
-                    <div class="menu__item-total"><span>${this.price}</span> грн/день</div> <!-- Отображаем цену -->
-                </div>
-            `;
-            this.parent.append(element); // Добавляем элемент на страницу
+                <div class="menu__item-cost">Цена:</div>
+                <div class="menu__item-total"><span>${this.price}</span> грн/день</div>
+            </div>
+        `;
+
+            // Вставляем карточку в родительский контейнер
+            this.parent.append(element);
         }
     }
 
-    // Используем библиотеку Axios для получения данных с сервера
-    axios.get('http://localhost:3000/menu') // Получаем данные с сервера
+    // Получаем данные с сервера
+    getResource('http://localhost:3000/menu')
         .then(data => {
-            // Перебираем полученные данные и создаем карточки меню
+            // Проходимся по массиву данных с сервера
             data.data.forEach(({
-                img,    // Изображение
-                altimg, // Атрибут alt для изображения
-                title,  // Заголовок
-                descr,  // Описание
-                price   // Цена
+                img,       // Путь к изображению
+                altimg,    // Альтернативный текст
+                title,     // Заголовок
+                descr,     // Описание
+                price      // Цена
             }) => {
-                // Для каждой записи создаем новый объект MenuCard и рендерим её на страницу
+                // Создаём новую карточку и рендерим её
                 new MenuCard(img, altimg, title, descr, price, '.menu .container').render();
             });
         });
 }
 
-// Экспортируем функцию, чтобы её можно было использовать в других модулях
-module.exports = cards;
+// Экспортируем функцию для использования в других модулях
+export default cards;
